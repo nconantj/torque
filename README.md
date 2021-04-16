@@ -47,13 +47,15 @@ FLUSH PRIVILEGES;
 
 Then create a table in the database to store the logged data using the `create_torque_log_table.sql` file provided in the `scripts` folder of this repo: 
 
+**WARNING:** This is data destructive. Export your data before running the script if you are updating.
+
 ```bash
 mysql -u yoursqlusername -p < scripts/create_torque_log_table.sql
 ```
 
-
 ### Configure Webserver ###
 
+# Move Files #
 Move the contents of the `web` folder to your webserver and set the appropriate permissions. For example, using an Apache server located at `/var/www`:
 
 ```bash
@@ -62,6 +64,8 @@ cd /var/www/torque
 find . -type d -exec chmod 755 {} +
 find . -type f -exec chmod 644 {} +
 ```
+
+# Set Credentials #
 
 Rename the `creds-sample.php` file to `creds.php`:
 
@@ -81,7 +85,10 @@ $db_table = "raw_logs";
 ...
 ```
 
-To forward data to A Better Route Planner (ABRP) change **$abrp_forward** field to **true**.
+# Enable [A Better Route Planner (ABRP)](https://abetterrouteplanner.com) Forwarding (optional) #
+**NOTE:** ABRP forwarding assumes you have your Torque e-mail address set to your ABRP token as described in the ABRP Torque setup.
+
+To forward data to ABRP change **$abrp_forward** field to **true**:
 
 ```php
 ...
@@ -89,8 +96,7 @@ $abrp_forward = true;
 ...
 ```
 
-**NOTE:** ABRP forwarding assumes you have your Torque e-mail address set to your ABRP token as described in the ABRP Torque setup.
-# Settings in Torque App #
+# General Settings in Torque App #
 
 To use your database/server with Torque, open the app on your phone and navigate to:
 
@@ -103,5 +109,19 @@ Enter the URL to your **upload_data.php** script and press `OK`. Test that it wo
 <div align="center" style="padding-bottom:15px;"><a href="https://storage.googleapis.com/torque_github/torque_webserver_url.png" target="_blank"><img src="https://storage.googleapis.com/torque_github/torque_webserver_url.png" width="49%" align="left"></img></a><a href="https://storage.googleapis.com/torque_github/torque_test_passed.png" target="_blank"><img src="https://storage.googleapis.com/torque_github/torque_test_passed.png" width="49%" align="right"></img></a></div>
 
 The final thing you'll want to do before going for a drive is to check the appropriate boxes on the `Data Logging & Upload` page under the `REALTIME WEB UPLOAD` section. Personally, I have both **Upload to webserver** and **Only when ODB connected** checked.
+
+At this point, you should be all setup. The next time you connect to Torque in your car, data will begin syncing into your MySQL database in real-time!
+
+# ABRP Settings in Torque App #
+
+To use your database/server with Torque, open the app on your phone and navigate to:
+
+```
+Settings -> Data Logging & Upload -> Webserver URL
+```
+
+Follow instructions from ABRP, but enter the URL to your **upload_data.php** script and press `OK`. Test that it works by clicking `Test settings` and you should see a success message like the image on the right:
+
+<div align="center" style="padding-bottom:15px;"><a href="https://storage.googleapis.com/torque_github/torque_webserver_url.png" target="_blank"><img src="https://storage.googleapis.com/torque_github/torque_webserver_url.png" width="49%" align="left"></img></a><a href="https://storage.googleapis.com/torque_github/torque_test_passed.png" target="_blank"><img src="https://storage.googleapis.com/torque_github/torque_test_passed.png" width="49%" align="right"></img></a></div>
 
 At this point, you should be all setup. The next time you connect to Torque in your car, data will begin syncing into your MySQL database in real-time!
