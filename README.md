@@ -8,9 +8,11 @@ The interface allows the user to:
   * Create time series plots of OBD2 data
   * Easily export data to CSV or JSON
 
+<!--
 # Demo #
 
 [Check out the demo!](http://data.mattnicklay.com/torque/session.php?id=1404557450999)
+-->
 
 # Requirements #
 
