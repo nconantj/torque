@@ -8,7 +8,7 @@ if ($abrp_forward) {
     $result = file_get_contents("http://api.iternio.com/1/tlm/torque?$params");
 }
 
-$db = new DBAccess();
+$db = new DBAccess($db_host, $db_user, $db_pass, $db_name);
 
 // Create an array of all the existing fields in the database
 $db_query_result = $db->get_fields($table) or db->db_die;
