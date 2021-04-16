@@ -4,7 +4,7 @@ require_once ('auth_app.php');
 
 if ($abrp_forward) {
     $params = $_SERVER['QUERY_STRING'];
-    $result = file_get_contents("http://api.iternion.com/1/tlm/torque?$params");
+    $result = file_get_contents("http://api.iternio.com/1/tlm/torque?$params");
 }
 
 // Connect to Database
