@@ -1,3 +1,5 @@
+This repo is a fork from econpy original OpenTorque Viewer.
+
 This repo contains everything needed to setup an interface for uploading ODB2 data logged from your car in real-time using the [Torque Pro](https://play.google.com/store/apps/details?id=org.prowl.torque) app for Android.
 
 The interface allows the user to:
@@ -25,7 +27,7 @@ If in doubt, I'd recommend using Ubuntu 12.04 LTS.
 First clone the repo:
 
 ```bash
-git clone https://github.com/econpy/torque
+git clone https://github.com/nconantj/torque
 cd torque
 ```
 
