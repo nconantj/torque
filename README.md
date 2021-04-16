@@ -1,4 +1,4 @@
-This repo is a fork from econpy original OpenTorque Viewer.
+This repo is a fork of the original OpenTorque Viewer by econpy.
 
 This repo contains everything needed to setup an interface for uploading ODB2 data logged from your car in real-time using the [Torque Pro](https://play.google.com/store/apps/details?id=org.prowl.torque) app for Android.
 
