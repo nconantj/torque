@@ -81,7 +81,15 @@ $db_table = "raw_logs";
 ...
 ```
 
+To forward data to A Better Route Planner (ABRP) change **$abrp_forward** field to **true**.
 
+```php
+...
+$abrp_forward = true;
+...
+```
+
+**NOTE:** ABRP forwarding assumes you have your Torque e-mail address set to your ABRP token as described in the ABRP Torque setup.
 # Settings in Torque App #
 
 To use your database/server with Torque, open the app on your phone and navigate to:

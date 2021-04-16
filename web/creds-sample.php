@@ -1,4 +1,7 @@
 <?php
+// A Better Route Planner (ABRP) Forwarding
+// Forward to ABRP?
+$abrp_forward = false;
 
 // MySQL Credentials
 $db_host = 'localhost';
