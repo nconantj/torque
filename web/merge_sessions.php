@@ -27,15 +27,14 @@ if (isset($mergesession) && !empty($mergesession) && isset($mergesessionwith) &&
     }
 
     // Connect to Database
-    $con = mysql_connect($db_host, $db_user, $db_pass) or die(mysql_error());
-    mysql_select_db($db_name, $con) or die(mysql_error());
+    $con = mysqli_connect($db_host, $db_user, $db_pass, $db_name) or die(mysqli_error());
 
-    $mergeresult = mysql_query("UPDATE $db_table
+    $mergeresult = mysqli_query($con, "UPDATE $db_table
                           SET session=$mergesession
-                          WHERE session=$mergesessionwith;", $con) or die(mysql_error());
+                          WHERE session=$mergesessionwith;") or die(mysqli_error());
 
-    mysql_free_result($mergeresult);
-    mysql_close($con);
+    mysqli_free_result($mergeresult);
+    mysqli_close($con);
 
     //Show merged session
     $session_id = $mergesession;

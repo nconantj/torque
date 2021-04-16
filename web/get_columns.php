@@ -2,16 +2,15 @@
 require_once("./creds.php");
 
 // Connect to Database
-mysql_connect($db_host, $db_user, $db_pass) or die(mysql_error());
-mysql_select_db("INFORMATION_SCHEMA") or die(mysql_error());
+$con = mysqli_connect($db_host, $db_user, $db_pass, "INFORMATION_SCHEMA") or die(mysqli_error());
 
 // Create array of column name/comments for chart data selector form
-$colqry = mysql_query("SELECT COLUMN_NAME,COLUMN_COMMENT,DATA_TYPE
+$colqry = mysqli_query($con, "SELECT COLUMN_NAME,COLUMN_COMMENT,DATA_TYPE
                            FROM COLUMNS WHERE TABLE_SCHEMA='".$db_name."'
-                           AND TABLE_NAME='".$db_table."'") or die(mysql_error());
+                           AND TABLE_NAME='".$db_table."'") or die(mysqli_error());
 
 // Select the column name and comment for data that can be plotted.
-while ($x = mysql_fetch_array($colqry)) {
+while ($x = mysqli_fetch_array($colqry)) {
     if ((substr($x[0], 0, 1) == "k") && ($x[2] == "float")) {
         $coldata[] = array("colname"=>$x[0], "colcomment"=>$x[1]);
     }
@@ -19,7 +18,7 @@ while ($x = mysql_fetch_array($colqry)) {
 
 $numcols = strval(count($coldata)+1);
 
-mysql_free_result($colqry);
+mysqli_free_result($colqry);
 
 
 //TODO: Do this once in a dedicated file
@@ -34,7 +33,7 @@ elseif (isset($_GET["id"])) {
 // If we have a certain session, check which colums contain no information at all
 $coldataempty = array();
 if (isset($session_id)) {
-    mysql_select_db($db_name) or die(mysql_error());
+    mysqli_select_db($con, $db_name) or die(mysqli_error());
 
     //Count distinct values for each known column
     //TODO: Unroll loop into single query
@@ -43,16 +42,16 @@ if (isset($session_id)) {
         $colname = $col["colname"];
 
         // Count number of different values for this specific field
-        $colqry = mysql_query("SELECT count(DISTINCT $colname)<2 as $colname
+        $colqry = mysqli_query($con, "SELECT count(DISTINCT $colname)<2 as $colname
                                FROM $db_table
-                               WHERE session=$session_id") or die(mysql_error());
-        $colresult = mysql_fetch_assoc($colqry);
+                               WHERE session=$session_id") or die(mysqli_error());
+        $colresult = mysqli_fetch_assoc($colqry);
         $coldataempty[$colname] = $colresult[$colname];
     }
 
     //print_r($coldataempty);
 }
 
-mysql_close();
+mysqli_close($con);
 
 ?>

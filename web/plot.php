@@ -3,12 +3,11 @@ require_once("./creds.php");
 require_once("./parse_functions.php");
 
 // Connect to Database
-mysql_connect($db_host, $db_user, $db_pass) or die(mysql_error());
-mysql_select_db($db_name) or die(mysql_error());
+$con = mysqli_connect($db_host, $db_user, $db_pass, $db_name) or die(mysqli_error());
 
 // Grab the session number
 if (isset($_GET["id"]) and in_array($_GET["id"], $sids)) {
-    $session_id = mysql_real_escape_string($_GET['id']);
+    $session_id = mysqli_real_escape_string($con, $_GET['id']);
 
     // Get the torque key->val mappings
     $js = CSVtoJSON("./data/torque_keys.csv");
@@ -16,13 +15,13 @@ if (isset($_GET["id"]) and in_array($_GET["id"], $sids)) {
 
     // The columns to plot -- if no PIDs are specified I default to intake temp and OBD speed
     if (isset($_GET["s1"])) {
-        $v1 = mysql_real_escape_string($_GET['s1']);
+        $v1 = mysqli_real_escape_string($con, $_GET['s1']);
     }
     else {
         $v1 = "kd"; // OBD Speed
     }
     if (isset($_GET["s2"])) {
-        $v2 = mysql_real_escape_string($_GET['s2']);
+        $v2 = mysqli_real_escape_string($con, $_GET['s2']);
     }
     else {
         $v2 = "kf";   // Intake Air Temp
@@ -33,10 +32,10 @@ if (isset($_GET["id"]) and in_array($_GET["id"], $sids)) {
     $v2_label = '"'.$jsarr[$v2].'"';
 
     // Get data for session
-    $sessionqry = mysql_query("SELECT time,$v1,$v2
+    $sessionqry = mysqli_query($con, "SELECT time,$v1,$v2
                           FROM $db_table
                           WHERE session=$session_id
-                          ORDER BY time DESC;") or die(mysql_error());
+                          ORDER BY time DESC;") or die(mysqli_error());
 
     //Speed conversion
     if (!$source_is_miles && $use_miles)
@@ -88,7 +87,7 @@ if (isset($_GET["id"]) and in_array($_GET["id"], $sids)) {
 
     // Convert data units
     // TODO: Use the userDefault fields to do these conversions dynamically
-    while($row = mysql_fetch_assoc($sessionqry)) {
+    while($row = mysqli_fetch_assoc($sessionqry)) {
         // data column #1
         if (substri_count($jsarr[$v1], "Speed") > 0) {
             $x = intval($row[$v1]) * $speed_factor;
@@ -144,4 +143,5 @@ else {
 
 }
 
+mysqli_close($con);
 ?>
