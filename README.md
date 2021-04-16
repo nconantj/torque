@@ -33,7 +33,7 @@ git clone https://github.com/nconantj/torque
 cd torque
 ```
 
-### Configure MySQL ###
+## Configure MySQL ##
 
 To get started, create a database named `torque` and a user with permission to insert and read data from the database. In this tutorial, we'll create a user `steve` with password `zissou` that has access to all tables in the database `torque` from `localhost`:
 
@@ -53,9 +53,9 @@ Then create a table in the database to store the logged data using the `create_t
 mysql -u yoursqlusername -p < scripts/create_torque_log_table.sql
 ```
 
-### Configure Webserver ###
+## Configure Webserver ##
 
-# Move Files #
+### Move Files ###
 Move the contents of the `web` folder to your webserver and set the appropriate permissions. For example, using an Apache server located at `/var/www`:
 
 ```bash
@@ -65,7 +65,7 @@ find . -type d -exec chmod 755 {} +
 find . -type f -exec chmod 644 {} +
 ```
 
-# Set Credentials #
+### Set Credentials ###
 
 Rename the `creds-sample.php` file to `creds.php`:
 
@@ -85,7 +85,7 @@ $db_table = "raw_logs";
 ...
 ```
 
-# Enable [A Better Route Planner (ABRP)](https://abetterrouteplanner.com) Forwarding (optional) #
+### Enable [A Better Route Planner (ABRP)](https://abetterrouteplanner.com) Forwarding (optional) ###
 **NOTE:** ABRP forwarding assumes you have your Torque e-mail address set to your ABRP token as described in the ABRP Torque setup.
 
 To forward data to ABRP change **$abrp_forward** field to **true**:
@@ -96,7 +96,9 @@ $abrp_forward = true;
 ...
 ```
 
-# General Settings in Torque App #
+# Torque Settings #
+
+### General Settings ###
 
 To use your database/server with Torque, open the app on your phone and navigate to:
 
@@ -112,7 +114,7 @@ The final thing you'll want to do before going for a drive is to check the appro
 
 At this point, you should be all setup. The next time you connect to Torque in your car, data will begin syncing into your MySQL database in real-time!
 
-# ABRP Settings in Torque App #
+### ABRP Settings ###
 
 To use your database/server with Torque, open the app on your phone and navigate to:
 
