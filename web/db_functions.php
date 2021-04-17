@@ -50,7 +50,7 @@
         }
         
         public function insert_data ($table, $cols, $vals) {
-            $query_str = "INSERT INTO $table    (". implode(",", $cols) . ") VALUES (" . implode(",", $vals) . ")";
+            $query_str = "INSERT INTO $table (". implode(",", $cols) . ") VALUES (" . implode(",", $vals) . ")";
             return execute_query($query_str);
         }
     }
