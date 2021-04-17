@@ -25,12 +25,12 @@
         
         public function get_fields($table) {
             $query_str = "SHOW COLUMNS FROM $table";
-            return execute_query($query_str);
+            return $this->execute_query($query_str);
         }
         
         public function enumerate_rows($result) {    
-            if (get_num_rows($result) > 0) {
-                while ($row = get_assoc_row_data($result)) {
+            if ($this->get_num_rows($result) > 0) {
+                while ($row = $this->get_assoc_row_data($result)) {
                     $dbfields[] = ($row['Field']);
                 }
             }
@@ -46,12 +46,12 @@
         
         public function add_column($table, $col_name, $col_type, $nullable, $default_val) {
             $query_str = "ALTER TABLE $table ADD $col_name $col_type " . ($nullable ? "" : "NOT NULL ") . " default '$default_val'";
-            return execute_query($query_str);
+            return $this->execute_query($query_str);
         }
         
         public function insert_data ($table, $cols, $vals) {
             $query_str = "INSERT INTO $table (". implode(",", $cols) . ") VALUES (" . implode(",", $vals) . ")";
-            return execute_query($query_str);
+            return $this->execute_query($query_str);
         }
     }
     
