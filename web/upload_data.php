@@ -11,7 +11,7 @@ if ($abrp_forward) {
 $db = new DBAccess($db_host, $db_user, $db_pass, $db_name);
 
 // Create an array of all the existing fields in the database
-$db_query_result = $db->get_fields($table) or db->db_die;
+$db_query_result = $db->get_fields($db_table) or $db->db_die();
 $dbfields[] = $db->enumerate_rows($db_query_result);
 
 // Iterate over all the k* _GET arguments to check that a field exists
@@ -49,13 +49,13 @@ if (sizeof($_GET) > 0) {
         //}
         // If the field doesn't already exist, add it to the database
         if (!in_array($key, $dbfields) and $submitval == 1) {
-            db->add_column($db_table, 'VARCHAR(255)', false, '0');
+            $db->add_column($db_table, 'VARCHAR(255)', false, '0');
         }
     }
 
     if ((sizeof($keys) === sizeof($values)) && sizeof($keys) > 0) {
         // Now insert the data for all the fields
-        db->insert_data();
+        $db->insert_data();
     }
 } else {
     die ( "No URL parameters." );
