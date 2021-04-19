@@ -49,13 +49,13 @@ if (sizeof($_GET) > 0) {
         //}
         // If the field doesn't already exist, add it to the database
         if (!in_array($key, $dbfields) and $submitval == 1) {
-            $db->add_column($db_table, 'VARCHAR(255)', false, '0');
+            $db->add_column($db_table, $key, 'VARCHAR(255)', false, '0');
         }
     }
 
     if ((sizeof($keys) === sizeof($values)) && sizeof($keys) > 0) {
         // Now insert the data for all the fields
-        $db->insert_data();
+        $db->insert_data($db_table, $keys, $values);
     }
 } else {
     die ( "No URL parameters." );
