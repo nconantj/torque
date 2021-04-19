@@ -37,8 +37,6 @@ else {
     }
 }
 
-mysqli_close($con);
-
 header("Location: ".$outurl);
 
 ?>
