@@ -98,7 +98,7 @@
 				$result[] = $col . $sep . $val;
 			}
 			
-			return $result[];
+			return $result;
 		}
 		
 		public function update_data($table, $assigments, $where_str) {
