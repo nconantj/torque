@@ -38,7 +38,7 @@ if (isset($_GET["id"]) and in_array($_GET["id"], $sids)) {
     //                      WHERE session=$session_id
     //                      ORDER BY time DESC;") or die(mysqli_error());
 
-	$sessionqry = $db->get_data($db_table, array('time', $v1, $v2), null, "session=$session_id", "time DESC";
+	$sessionqry = $db->get_data($db_table, array('time', $v1, $v2), null, "session=$session_id", "time DESC");
 	
     //Speed conversion
     if (!$source_is_miles && $use_miles)

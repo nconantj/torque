@@ -34,7 +34,7 @@ if (isset($mergesession) && !empty($mergesession) && isset($mergesessionwith) &&
     //                      SET session=$mergesession
     //                      WHERE session=$mergesessionwith;") or die(mysqli_error());
 
-    $mergeresult = $db->update_data( $db_table, array( "session" => $mergesession), "session=$mergesessionwith")
+    $mergeresult = $db->update_data( $db_table, array( "session" => $mergesession), "session=$mergesessionwith");
 
     //Show merged session
     $session_id = $mergesession;
