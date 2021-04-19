@@ -2,16 +2,13 @@
 session_set_cookie_params(0,dirname($_SERVER['SCRIPT_NAME']));
 session_start();
 
-//Connect to Database
-$con = mysqli_connect($db_host, $db_user, $db_pass, $db_name) or die(mysqli_error());
-
 // Get the Full URL to the session.php file
 $thisfile = "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
 $parts = strtok("url.php", $thisfile);
 if (isset($_GET["makechart"])) {
     $baselink = $parts["0"]."session.php";
     if (isset($_GET["seshid"])) {
-        $seshid = strval(mysqli_real_escape_string($con, $_GET["seshid"]));
+        $seshid = urlencode($_GET["seshid"]);
         if (isset($_POST["plotdata"])) {
             $plotdataarray = $_POST["plotdata"];
             $s1data = $plotdataarray[0];
@@ -31,7 +28,7 @@ if (isset($_GET["makechart"])) {
 else {
     $baselink = $parts["0"]."session.php";
     if (isset($_POST["seshidtag"])) {
-        $seshid = strval(mysqli_real_escape_string($con, $_POST["seshidtag"]));
+        $seshid = urlencode($_POST["seshidtag"]);
         $outurl = $baselink."?id=".$seshid;
     }
     else {
