@@ -9,11 +9,12 @@ require_once ("./merge_sessions.php");
 require_once ("./get_sessions.php");
 require_once ("./get_columns.php");
 require_once ("./plot.php");
+require_once ('db_functions.php');
 
 $_SESSION['recent_session_id'] = strval(max($sids));
 
 // Connect to Database
-$con = mysqli_connect($db_host, $db_user, $db_pass, $db_name) or die(mysqli_error());
+$db = new DBAccess($db_host, $db_user, $db_pass, $db_name);
 
 if (isset($_POST["id"])) {
     $session_id = preg_replace('/\D/', '', $_POST['id']);
@@ -33,17 +34,29 @@ if (isset($session_id)) {
     }
 
     // Get GPS data for session
-    $sessionqry = mysqli_query($con, "SELECT kff1006, kff1005
-                          FROM $db_table
-                          WHERE session=$session_id
-                          ORDER BY time DESC") or die(mysqli_error());
+	// kff1005 = longitude
+	// kff1006 = latitude
+    $sessionqry = $db->get_data($db_table, array('kff1006 AS lat', 'kff1005 AS lon'), null, "session=$session_id", "time DESC");
+	
+	//mysqli_query($con, "SELECT kff1006, kff1005
+    //                      FROM $db_table
+    //                      WHERE session=$session_id
+    //                      ORDER BY time DESC") or die(mysqli_error());
 
+    // In theory we can now skip db to geo array loop with the above query.
+	
     $geolocs = array();
-    while($geo = mysqli_fetch_array($sessionqry)) {
-        if (($geo["0"] != 0) && ($geo["1"] != 0)) {
-            $geolocs[] = array("lat" => $geo["0"], "lon" => $geo["1"]);
-        }
-    }
+    //while($geo = mysqli_fetch_array($sessionqry)) {
+    //    if (($geo["0"] != 0) && ($geo["1"] != 0)) {
+    //        $geolocs[] = array("lat" => $geo["0"], "lon" => $geo["1"]);
+    //    }
+    //}
+	
+	while( $geo = $db->get_row_array_assoc($sessionqry) ) {
+		if (( $geo["lat"] != 0 ) && ( $geo["lon"] != 0 )) {
+			$geolocs[] = array( "lat" => $geo["lat"], "lon" => $geo["lon"]);
+		}
+	}
 
     // Create array of Latitude/Longitude strings in Google Maps JavaScript format
     $mapdata = array();
@@ -55,8 +68,6 @@ if (isset($session_id)) {
     // Don't need to set zoom manually
     $setZoomManually = 0;
 
-    mysqli_free_result($sessionqry);
-    mysqli_close($con);
 }
 else {
     // Define these so we don't get an error on empty page loads. Instead it

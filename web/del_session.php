@@ -1,5 +1,6 @@
 <?php
-require_once("./creds.php");
+require_once ('creds.php');
+require_once ('db_functions.php');
 
 session_start();
 
@@ -12,13 +13,12 @@ elseif (isset($_GET["deletesession"])) {
 
 if (isset($deletesession) && !empty($deletesession)) {
     // Connect to Database
-    $con = mysqli_connect($db_host, $db_user, $db_pass, $db_name) or die(mysqli_error());
+    $db = new DBAccess($db_host, $db_user, $db_pass, $db_name);
 
-    $delresult = mysqli_query($con, "DELETE FROM $db_table
-                          WHERE session=$deletesession;") or die(mysqli_error());
-
-    mysqli_free_result($delresult);
-    mysqli_close($con);
+    //$delresult = mysqli_query($con, "DELETE FROM $db_table
+    //                      WHERE session=$deletesession;") or die(mysqli_error());
+	
+	$delresult = $db->delete_data($db_table, "session=$deletesession");
 }
 
 ?>

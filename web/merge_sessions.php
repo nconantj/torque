@@ -1,6 +1,7 @@
 <?php
 require_once("./creds.php");
 require_once("./get_sessions.php");
+require_once ('db_functions.php');
 
 session_start();
 
@@ -27,14 +28,13 @@ if (isset($mergesession) && !empty($mergesession) && isset($mergesessionwith) &&
     }
 
     // Connect to Database
-    $con = mysqli_connect($db_host, $db_user, $db_pass, $db_name) or die(mysqli_error());
+    $db = new DBAccess($db_host, $db_user, $db_pass, $db_name);
 
-    $mergeresult = mysqli_query($con, "UPDATE $db_table
-                          SET session=$mergesession
-                          WHERE session=$mergesessionwith;") or die(mysqli_error());
+    //$mergeresult = mysqli_query($con, "UPDATE $db_table
+    //                      SET session=$mergesession
+    //                      WHERE session=$mergesessionwith;") or die(mysqli_error());
 
-    mysqli_free_result($mergeresult);
-    mysqli_close($con);
+    $mergeresult = $db->update_data( $db_table, array( "session" => $mergesession), "session=$mergesessionwith")
 
     //Show merged session
     $session_id = $mergesession;

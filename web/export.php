@@ -1,35 +1,42 @@
 <?php
 require("./creds.php");
+require_once ('db_functions.php');
 
 // Connect to Database
-$con = mysqli_connect($db_host, $db_user, $db_pass, $db_name) or die(mysqli_error());
+$db = new DBAccess($db_host, $db_user, $db_pass, $db_name);
 
 if (isset($_GET["sid"])) {
-    $session_id = mysqli_real_escape_string($con, $_GET['sid']);
+    $session_id = $db->get_escape_string($_GET['sid']);
     // Get data for session
     $output = "";
-    $sql = mysqli_query($con, "SELECT * FROM $db_table WHERE session=$session_id ORDER BY time DESC;") or die(mysqli_error());
+    //$sql = mysqli_query($con, "SELECT * FROM $db_table WHERE session=$session_id ORDER BY time DESC;") or die(mysqli_error());
+	
+	$sql = $db->get_data(
+		$db_table,
+		array("*"),
+		null,
+		"session=$session_id",
+		"time DESC"
+	);
 
     if ($_GET["filetype"] == "csv") {
-        $columns_total = mysqli_field_count($sql);
+        $columns_total = $db->get_field_count($sql);
 
         // Get The Field Name
         for ($i = 0; $i < $columns_total; $i++) {
-            $heading = mysqli_fetch_field_direct($sql, $i)['name'];
+            //$heading = mysqli_fetch_field_direct($sql, $i)['name'];
+			$heading = $db->get_field_name($sql, $i);
             $output .= '"'.$heading.'",';
         }
         $output .="\n";
 
         // Get Records from the table
-        while ($row = mysqli_fetch_array($sql)) {
+        while ($row = $db->get_row_array_num($sql)) {
             for ($i = 0; $i < $columns_total; $i++) {
                 $output .='"'.$row["$i"].'",';
             }
             $output .="\n";
         }
-
-        mysqli_free_result($sql);
-        mysqli_close($con);
 
         // Download the file
         $csvfilename = "torque_session_".$session_id.".csv";
@@ -41,13 +48,10 @@ if (isset($_GET["sid"])) {
     }
     else if ($_GET["filetype"] == "json") {
         $rows = array();
-        while($r = mysqli_fetch_assoc($sql)) {
+        while($r = $db->get_assoc_row_data($sql)) {
             $rows[] = $r;
         }
         $jsonrows = json_encode($rows);
-
-        mysqli_free_result($sql);
-        mysqli_close($con);
 
         // Download the file
         $jsonfilename = "torque_session_".$session_id.".json";
