@@ -14,7 +14,7 @@
         }
 		
 		public function change_db($new_db) {
-			return $this->mysqli->select_db($db_name);
+			return $this->mysqli->select_db($new_db);
 		}
             
         public function db_die() {
