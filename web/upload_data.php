@@ -1,6 +1,7 @@
 <?php
 require_once ('creds.php');
 require_once ('auth_app.php');
+require_once ('db_functions.php');
 
 if ($abrp_forward) {
     $params = $_SERVER['QUERY_STRING'];
@@ -8,20 +9,17 @@ if ($abrp_forward) {
 }
 
 // Connect to Database
-$con = mysqli_connect($db_host, $db_user, $db_pass, $db_name) or die(mysqli_error());
+$db = new DBAccess($db_host, $db_user, $db_pass, $db_name);
 
 // Create an array of all the existing fields in the database
-$result = mysqli_query($con, "SHOW COLUMNS FROM $db_table") or die(mysqli_error());
-if (mysqli_num_rows($result) > 0) {
-    while ($row = mysqli_fetch_assoc($result)) {
-        $dbfields[]=($row['Field']);
-    }
-}
+$db_query_result = $db->get_fields($db_table) or $db->db_die();
+$dbfields[] = $db->enumerate_rows($db_query_result);
 
 // Iterate over all the k* _GET arguments to check that a field exists
 if (sizeof($_GET) > 0) {
     $keys = array();
     $values = array();
+
     foreach ($_GET as $key => $value) {
         // Keep columns starting with k
         if (preg_match("/^k/", $key)) {
@@ -34,10 +32,12 @@ if (sizeof($_GET) > 0) {
             $values[] = "'".$value."'";
             $submitval = 1;
         }
+
         // Skip columns matching userUnit*, defaultUnit*, and profile*
         else if (preg_match("/^userUnit/", $key) or preg_match("/^defaultUnit/", $key) or (preg_match("/^profile/", $key) and (!preg_match("/^profileName/", $key)))) {
             $submitval = 0;
         }
+
         else {
             $submitval = 0;
         }
@@ -50,21 +50,17 @@ if (sizeof($_GET) > 0) {
         //}
         // If the field doesn't already exist, add it to the database
         if (!in_array($key, $dbfields) and $submitval == 1) {
-            $sqlalter = "ALTER TABLE $db_table ADD $key VARCHAR(255) NOT NULL default '0'";
-            mysqli_query($con, $sqlalter) or die(mysqli_error());
+            $db->add_column($db_table, $key, 'VARCHAR(255)', false, '0');
         }
     }
+
     if ((sizeof($keys) === sizeof($values)) && sizeof($keys) > 0) {
         // Now insert the data for all the fields
-        $sql = "INSERT INTO $db_table (".implode(",", $keys).") VALUES (".implode(",", $values).")";
-        mysqli_query($con, $sql) or die(mysqli_error());
+        $db->insert_data($db_table, $keys, $values);
     }
 } else {
-    mysqli_close($con);
     die ( "No URL parameters." );
 }
-
-mysqli_close($con);
 
 // Return the response required by Torque
 echo "OK!";
