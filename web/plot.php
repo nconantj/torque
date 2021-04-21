@@ -33,11 +33,6 @@ if (isset($_GET["id"]) and in_array($_GET["id"], $sids)) {
     $v2_label = '"'.$jsarr[$v2].'"';
 
     // Get data for session
-    //$sessionqry = mysqli_query($con, "SELECT time,$v1,$v2
-    //                      FROM $db_table
-    //                      WHERE session=$session_id
-    //                      ORDER BY time DESC;") or die(mysqli_error());
-
 	$sessionqry = $db->get_data($db_table, array('time', $v1, $v2), null, "session=$session_id", "time DESC");
 	
     //Speed conversion
@@ -90,7 +85,6 @@ if (isset($_GET["id"]) and in_array($_GET["id"], $sids)) {
 
     // Convert data units
     // TODO: Use the userDefault fields to do these conversions dynamically
-//    while($row = mysqli_fetch_assoc($sessionqry)) {
 	while( $row = $db->get_assoc_row_data($sessionqry) ) {
         // data column #1
         if (substri_count($jsarr[$v1], "Speed") > 0) {

@@ -9,7 +9,6 @@ if (isset($_GET["sid"])) {
     $session_id = $db->get_escape_string($_GET['sid']);
     // Get data for session
     $output = "";
-    //$sql = mysqli_query($con, "SELECT * FROM $db_table WHERE session=$session_id ORDER BY time DESC;") or die(mysqli_error());
 	
 	$sql = $db->get_data(
 		$db_table,
@@ -24,7 +23,6 @@ if (isset($_GET["sid"])) {
 
         // Get The Field Name
         for ($i = 0; $i < $columns_total; $i++) {
-            //$heading = mysqli_fetch_field_direct($sql, $i)['name'];
 			$heading = $db->get_field_name($sql, $i);
             $output .= '"'.$heading.'",';
         }

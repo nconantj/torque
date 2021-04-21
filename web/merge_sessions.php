@@ -30,10 +30,6 @@ if (isset($mergesession) && !empty($mergesession) && isset($mergesessionwith) &&
     // Connect to Database
     $db = new DBAccess($db_host, $db_user, $db_pass, $db_name);
 
-    //$mergeresult = mysqli_query($con, "UPDATE $db_table
-    //                      SET session=$mergesession
-    //                      WHERE session=$mergesessionwith;") or die(mysqli_error());
-
     $mergeresult = $db->update_data( $db_table, array( "session" => $mergesession), "session=$mergesessionwith");
 
     //Show merged session

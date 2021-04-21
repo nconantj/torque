@@ -38,19 +38,9 @@ if (isset($session_id)) {
 	// kff1006 = latitude
     $sessionqry = $db->get_data($db_table, array('kff1006 AS lat', 'kff1005 AS lon'), null, "session=$session_id", "time DESC");
 	
-	//mysqli_query($con, "SELECT kff1006, kff1005
-    //                      FROM $db_table
-    //                      WHERE session=$session_id
-    //                      ORDER BY time DESC") or die(mysqli_error());
-
     // In theory we can now skip db to geo array loop with the above query.
 	
     $geolocs = array();
-    //while($geo = mysqli_fetch_array($sessionqry)) {
-    //    if (($geo["0"] != 0) && ($geo["1"] != 0)) {
-    //        $geolocs[] = array("lat" => $geo["0"], "lon" => $geo["1"]);
-    //    }
-    //}
 	
 	while( $geo = $db->get_row_array_assoc($sessionqry) ) {
 		if (( $geo["lat"] != 0 ) && ( $geo["lon"] != 0 )) {

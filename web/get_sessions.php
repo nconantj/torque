@@ -9,12 +9,7 @@ $timezone = $_SESSION['time'];
 // Connect to Database
 $db = new DBAccess($db_host, $db_user, $db_pass, $db_name);
 
-// Get list of unique session IDs
-//$sessionqry = mysqli_query($con, "SELECT COUNT(*) as `Session Size`, MIN(time) as `MinTime`, MAX(time) as `MaxTime`, session
-//                      FROM $db_table
-//                      GROUP BY session
-//                      ORDER BY time DESC") or die(mysqli_error());
-					  
+// Get list of unique session IDs					  
 $sessionqry = $db->get_data(
 	$db_table, 
 	array(
