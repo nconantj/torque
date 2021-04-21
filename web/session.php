@@ -38,21 +38,13 @@ if (isset($session_id)) {
 	// kff1006 = latitude
     $sessionqry = $db->get_data($db_table, array('kff1006 AS lat', 'kff1005 AS lon'), null, "session=$session_id", "time DESC");
 	
-    // In theory we can now skip db to geo array loop with the above query.
-	
-    $geolocs = array();
-	
-	while( $geo = $db->get_row_array_assoc($sessionqry) ) {
+    // Create array of Latitude/Longitude strings in Google Maps JavaScript format
+	$mapdata = array();
+    while( $geo = $db->get_row_array_assoc($sessionqry) ) {
 		if (( $geo["lat"] != 0 ) && ( $geo["lon"] != 0 )) {
-			$geolocs[] = array( "lat" => $geo["lat"], "lon" => $geo["lon"]);
+			$mapdata[] = "new google.maps.LatLng(".$geo['lat'].", ".$geo['lon'].")";
 		}
 	}
-
-    // Create array of Latitude/Longitude strings in Google Maps JavaScript format
-    $mapdata = array();
-    foreach($geolocs as $d) {
-        $mapdata[] = "new google.maps.LatLng(".$d['lat'].", ".$d['lon'].")";
-    }
     $imapdata = implode(",\n                    ", $mapdata);
 
     // Don't need to set zoom manually
