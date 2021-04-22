@@ -55,8 +55,8 @@ IF NOT RESULT:
   $data = arrray();
   FOR EACH key, value IN $_GET
     $data_key = substitute("k" for "defaultUnit" in key)
-    $data[$data_key] = value
-  CONVERT $data TO INDEXED ARRAY WITH $sessid ENTRY
+    $data[$data_key] = array( session_id => $sessid, default_unit => value )
+  CONVERT $data TO INDEXED ARRAY
   "INSERT INTO key_info_temp (session_id, key_id, default_unit) VALUES $data"
   IF NOT SUCCESS: ERROR
 ELSE
@@ -80,14 +80,87 @@ ELSE
            b) Found: Continue.
 		 ii) Link profile to session in vehicle_info
  */
+ 
+/*
+"SELECT int_id FROM vehicle_profile WHERE owner=$userid AND name='profileName' AND fuel_type = profileFuelType AND fuel_cost = profileFuelCost AND weight=profileWeight AND ve=profileVe"
+IF NOT RESULT:
+  "INSERT INTO vehicle_profile (owner, name, fuel_type, fuel_cost, weight, ve) VALUES ($userid, 'profileName', profileFuelType, profileFuelCost, profileWeight, profileVe)"
+  IF SUCCESS: $carid = MySQLi::insert_id
+  ELSE: ERROR
+ELSE: $carid = RESULT('int_id')
+
+INSERT INTO vehicle_info (session_id, vehicle_id) VALUES ($sessid, $carid)
+IF NOT SUCCESS: ERROR
+ */
+ 
 /*     c) "user": Session Query 3 - User Info for Keys
  *       i) Replace "userUnit," "userShortName," and "userFullName" with "k" for all keys. 
  *         a) Transform into array ( key => array ( user_unit => <userUnit>, user_short_name => <userShortName>, user_full_name => <userFullName> ) ).
-           b) Replace any '+' except the any that are the first character with a space in all name entries. This is to account for Bolt EV cell voltages unless or until the prefix character is changed.
+ *         b) Replace any '+' except the any that are the first character with a space in all name entries. This is to account for Bolt EV cell voltages unless or until the prefix character is changed.
  *       ii) Check if session id exists in key_info_temp.  NB: Just use select query and check if we have results.
  *         a) Not Found: Insert data into key_info_temp.
  *         b) Found: Merge data with incoming data, insert into key_info, delete all records for session.
  */
+
+/*
+"SELECT key_id, long_name, short_name, default_unit, user_unit FROM key_info_temp WHERE session_id=$sessid"
+IF NOT RESULT:
+  $data = arrray();
+  FOR EACH key, value IN $_GET
+    $data_key = ""
+    $value_key = ""
+    IF FIND "userUnit" IN key
+        $data_key = substitute("k" for "userUnit" in key)
+        $value_key = "user_unit"
+    IF FIND "userShortName" IN key
+        $data_key = substitute("k" for "userShortName" in key)
+        $value_key = "short_name"
+    IF FIND "userFullName" IN key
+        $data_key = substitute("k" for "userFullName" in key)
+        $value_key = "full_name"
+    ELSE
+        ERROR
+    
+    IF $data[$data_key] IS NEW
+        $data[$data_key] = array( session_id => $sessid )
+    ELSE
+        $data[$data_key][$value_key] = value
+        
+  CONVERT $data TO INDEXED ARRAY
+  "INSERT INTO key_info_temp (session_id, key_id, long_name, short_name, user_unit) VALUES $data"
+  IF NOT SUCCESS: ERROR
+ELSE
+  $data = array()
+  FOR EACH row IN RESULT
+    $data[row[key_id]] = array( session_id => row[session_id], default_unit => row[default_unit])
+
+  FOR EACH key, value IN $_GET
+    $data_key = ""
+    $value_key = ""
+    IF FIND "userUnit" IN key
+        $data_key = substitute("k" for "userUnit" in key)
+        $value_key = "user_unit"
+    IF FIND "userShortName" IN key
+        $data_key = substitute("k" for "userShortName" in key)
+        $value_key = "short_name"
+    IF FIND "userFullName" IN key
+        $data_key = substitute("k" for "userFullName" in key)
+        $value_key = "full_name"
+    ELSE
+        ERROR
+    
+    IF $data[$data_key] IS NEW
+        $data[$data_key] = array( session_id => $sessid )
+    ELSE
+        $data[$data_key][$value_key] = value
+        
+  CONVERT $data TO INDEXED ARRAY
+  TRANSACTION:
+    "INSERT INTO key_info (session_id, key_id, long_name, short_name, default_unit, user_unit) VALUES $data"
+	"DELETE FROM key_info_temp WHERE session_id=$sessid"
+  IF NOT SUCCESS: ERROR
+ */
+
 /*     d) "k": Session Query 4 - Log Data (No documentation created at this time). - Model on old code.
  */
  
