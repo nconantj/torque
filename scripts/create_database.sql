@@ -3,11 +3,10 @@
 -- https://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Apr 22, 2021 at 01:03 PM
+-- Generation Time: Apr 22, 2021 at 06:36 PM
 -- Server version: 5.5.64-MariaDB
 -- PHP Version: 7.2.26
 
-SET FOREIGN_KEY_CHECKS=0;
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
 START TRANSACTION;
@@ -40,6 +39,22 @@ CREATE TABLE IF NOT EXISTS `key_info` (
   `default_unit` varchar(10) NOT NULL,
   `user_unit` varchar(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `key_info_temp`
+--
+
+DROP TABLE IF EXISTS `key_info_temp`;
+CREATE TABLE IF NOT EXISTS `key_info_temp` (
+  `session_id` int(11) NOT NULL,
+  `key_id` varchar(10) NOT NULL,
+  `long_name` varchar(60) DEFAULT NULL,
+  `short_name` varchar(30) DEFAULT NULL,
+  `default_unit` varchar(10) DEFAULT NULL,
+  `user_unit` varchar(10) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Holds key_info data for session until both calls complete.';
 
 -- --------------------------------------------------------
 
@@ -123,6 +138,13 @@ ALTER TABLE `key_info`
   ADD KEY `IDX_KI_SESS` (`session_id`);
 
 --
+-- Indexes for table `key_info_temp`
+--
+ALTER TABLE `key_info_temp`
+  ADD PRIMARY KEY (`session_id`,`key_id`),
+  ADD KEY `IDX_KIT_SESS` (`session_id`) USING BTREE;
+
+--
 -- Indexes for table `raw_logs`
 --
 ALTER TABLE `raw_logs`
@@ -149,7 +171,8 @@ ALTER TABLE `users`
 -- Indexes for table `vehicle_info`
 --
 ALTER TABLE `vehicle_info`
-  ADD PRIMARY KEY (`session_id`,`vehicle_id`);
+  ADD PRIMARY KEY (`session_id`,`vehicle_id`),
+  ADD KEY `FK_VP_ID` (`vehicle_id`);
 
 --
 -- Indexes for table `vehicle_profile`
@@ -189,6 +212,12 @@ ALTER TABLE `key_info`
   ADD CONSTRAINT `FK_KI_SESS` FOREIGN KEY (`session_id`) REFERENCES `session_header` (`int_id`);
 
 --
+-- Constraints for table `key_info_temp`
+--
+ALTER TABLE `key_info_temp`
+  ADD CONSTRAINT `FK_KIT_SESS` FOREIGN KEY (`session_id`) REFERENCES `session_header` (`int_id`);
+
+--
 -- Constraints for table `session_header`
 --
 ALTER TABLE `session_header`
@@ -198,14 +227,14 @@ ALTER TABLE `session_header`
 -- Constraints for table `vehicle_info`
 --
 ALTER TABLE `vehicle_info`
-  ADD CONSTRAINT `FK_SESS_ID` FOREIGN KEY (`session_id`) REFERENCES `session_header` (`int_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `FK_SESS_ID` FOREIGN KEY (`session_id`) REFERENCES `session_header` (`int_id`),
+  ADD CONSTRAINT `FK_VP_ID` FOREIGN KEY (`vehicle_id`) REFERENCES `vehicle_profile` (`int_id`);
 
 --
 -- Constraints for table `vehicle_profile`
 --
 ALTER TABLE `vehicle_profile`
   ADD CONSTRAINT `FK_VP_OWN` FOREIGN KEY (`owner`) REFERENCES `users` (`int_id`);
-SET FOREIGN_KEY_CHECKS=1;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
