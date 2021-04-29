@@ -1,6 +1,7 @@
 <?php
-require_once ('creds.php');
-require_once ('auth_functions.php');
+
+require_once('creds.php');
+require_once('auth_functions.php');
 
 //This variable will be evaluated at the end of this file to check if a user is authenticated
 $logged_in = false;
@@ -23,29 +24,28 @@ $logged_in = false;
 
 // Default is authentication for App is the ID
 
-if(!isset($auth_user_with_user_pass)) {
+if (!isset($auth_user_with_user_pass)) {
     $auth_user_with_user_pass = false;
 }
 
-if (!$logged_in && $auth_user_with_user_pass)
-{
-    if ( auth_user() ) {
+if (!$logged_in && $auth_user_with_user_pass) {
+    if (auth_user()) {
         $logged_in = true;
     }
 }
 
 //ATTENTION:
-//The Torque App has no way to provide other authentication information than its torque ID.
-//So, if no restriction of Torque IDs was defined in "creds.php", access to the file "upload_data.php" is always possible.
+//The Torque App has no way to provide other authentication information than its
+//torque ID.
+// So, if no restriction of Torque IDs was defined in "creds.php", access to the
+// file "upload_data.php" is always possible.
 
-if(!isset($auth_user_with_torque_id)) {
+if (!isset($auth_user_with_torque_id)) {
     $auth_user_with_torque_id = true;
 }
 
-if (!$logged_in && $auth_user_with_torque_id)
-{
-    if ( auth_id() )
-    {
+if (!$logged_in && $auth_user_with_torque_id) {
+    if (auth_id()) {
         $session_id = get_id();
         $logged_in = true;
     }
@@ -55,11 +55,13 @@ if (!$logged_in && $auth_user_with_torque_id)
 
 if (!$logged_in) {
     $txt  = "ERROR. Please authenticate with ";
-    $txt .= ($auth_user_with_user_pass?"User/Password":"");
-    $txt .= ( ($auth_user_with_user_pass && $auth_user_with_torque_id)?" or ":"");
-    $txt .= ($auth_user_with_torque_id?"Torque-ID":"");
+    $txt .= ($auth_user_with_user_pass ? "User/Password" : "");
+    $txt .= (
+        ($auth_user_with_user_pass && $auth_user_with_torque_id) ?
+        " or " :
+        ""
+    );
+    $txt .= ($auth_user_with_torque_id ? "Torque-ID" : "");
     echo $txt;
     exit(0);
 }
-
-?>

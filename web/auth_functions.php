@@ -5,12 +5,9 @@ function get_user()
 {
     if (isset($_POST["user"])) {
         $user = $_POST['user'];
-    }
-    elseif (isset($_GET["user"])) {
+    } elseif (isset($_GET["user"])) {
         $user = $_GET['user'];
-    }
-	else
-    {
+    } else {
         $user = "";
     }
 
@@ -23,12 +20,9 @@ function get_pass()
 {
     if (isset($_POST["pass"])) {
         $pass = $_POST['pass'];
-    }
-    elseif (isset($_GET["pass"])) {
+    } elseif (isset($_GET["pass"])) {
         $pass = $_GET['pass'];
-    }
-	else
-    {
+    } else {
         $pass = "";
     }
 
@@ -42,18 +36,15 @@ function get_id()
     $id = "";
 
     if (isset($_POST["id"])) {
-        if (1 === preg_match('/[\da-f]{32}/i', $_POST['id'], $matches))
-        {
+        if (1 === preg_match('/[\da-f]{32}/i', $_POST['id'], $matches)) {
+            $id = $matches[0];
+        }
+    } elseif (isset($_GET["id"])) {
+        if (1 === preg_match('/[\da-f]{32}/i', $_GET['id'], $matches)) {
             $id = $matches[0];
         }
     }
-    elseif (isset($_GET["id"])) {
-        if (1 === preg_match('/[\da-f]{32}/i', $_GET['id'], $matches))
-        {
-            $id = $matches[0];
-        }
-    }
-    
+
     return $id;
 }
 
@@ -63,16 +54,16 @@ function get_id()
 function auth_user()
 {
     global $auth_user, $auth_pass;
-    
+
     $user = get_user();
     $pass = get_pass();
 
     //No User/Pass defined: Allow everything
-    if ( empty($auth_user) && empty($auth_pass) ) {
+    if (empty($auth_user) && empty($auth_pass)) {
         return true;
     }
 
-    if ( ($user == $auth_user) && ($pass == $auth_pass) ) {
+    if (($user == $auth_user) && ($pass == $auth_pass)) {
         return true;
     }
 
@@ -92,38 +83,31 @@ function auth_id()
 
     // Parse IDs from "creds.php", if IDs are defined these will overrule HASHES
     $auth_by_hash_possible = false;
-    if (isset($torque_id) && !empty($torque_id))
-    {
-        if (!is_array($torque_id))
+    if (isset($torque_id) && !empty($torque_id)) {
+        if (!is_array($torque_id)) {
             $torque_id = array($torque_id);
+        }
 
-        $torque_id_hash = array_map(md5,$torque_id);
+        $torque_id_hash = array_map(md5, $torque_id);
         $auth_by_hash_possible = true;
-    }
-    // Parse HASHES
-    elseif (isset($torque_id_hash) && !empty($torque_id_hash))
-    {
-        if (!is_array($torque_id_hash))
+    } elseif (isset($torque_id_hash) && !empty($torque_id_hash)) {
+        // Parse HASHES
+        if (!is_array($torque_id_hash)) {
             $torque_id_hash = array($torque_id_hash);
+        }
+
         $auth_by_hash_possible = true;
     }
 
     // Authenticate torque instance: Check if we know its HASH
-    if ($auth_by_hash_possible)
-    {
-        if (in_array($session_id, $torque_id_hash) )
-        {
+    if ($auth_by_hash_possible) {
+        if (in_array($session_id, $torque_id_hash)) {
             return true;
         }
-    }
-    //No IDs/HASHEs defined: Allow everything
-    else
-    {
+    } else {
+        //No IDs/HASHEs defined: Allow everything
         return true;
     }
 
     return false;
 }
-
-
-?>

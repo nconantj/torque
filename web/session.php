@@ -1,15 +1,14 @@
 <?php
 
 ini_set('memory_limit', '-1');
-require_once ("./creds.php");
-require_once ("./auth_user.php");
-
-require_once ("./del_session.php");
-require_once ("./merge_sessions.php");
-require_once ("./get_sessions.php");
-require_once ("./get_columns.php");
-require_once ("./plot.php");
-require_once ('db_functions.php');
+require_once("./creds.php");
+require_once("./auth_user.php");
+require_once("./del_session.php");
+require_once("./merge_sessions.php");
+require_once("./get_sessions.php");
+require_once("./get_columns.php");
+require_once("./plot.php");
+require_once('db_functions.php');
 
 $_SESSION['recent_session_id'] = strval(max($sids));
 
@@ -18,46 +17,47 @@ $db = new DBAccess($db_host, $db_user, $db_pass, $db_name);
 
 if (isset($_POST["id"])) {
     $session_id = preg_replace('/\D/', '', $_POST['id']);
-}
-elseif (isset($_GET["id"])) {
+} elseif (isset($_GET["id"])) {
     $session_id = preg_replace('/\D/', '', $_GET['id']);
 }
 
 if (isset($session_id)) {
-
     //For the merge function, we need to find out, what would be the next session
-    $idx = array_search( $session_id, $sids);
-    if($idx>0) {
-        $session_id_next = $sids[$idx-1];
+    $idx = array_search($session_id, $sids);
+    if ($idx > 0) {
+        $session_id_next = $sids[$idx - 1];
     } else {
         $session_id_next = false;
     }
 
     // Get GPS data for session
-	// kff1005 = longitude
-	// kff1006 = latitude
-    $sessionqry = $db->get_data($db_table, array('kff1006 AS lat', 'kff1005 AS lon'), null, "session=$session_id", "time DESC");
-	
+    // kff1005 = longitude
+    // kff1006 = latitude
+    $sessionqry = $db->get_data(
+        $db_table,
+        array('kff1006 AS lat', 'kff1005 AS lon'),
+        null,
+        "session=$session_id",
+        "time DESC"
+    );
+
     // Create array of Latitude/Longitude strings in Google Maps JavaScript format
-	$mapdata = array();
-    while( $geo = $db->get_row_array_assoc($sessionqry) ) {
-		if (( $geo["lat"] != 0 ) && ( $geo["lon"] != 0 )) {
-			$mapdata[] = "new google.maps.LatLng(".$geo['lat'].", ".$geo['lon'].")";
-		}
-	}
+    $mapdata = array();
+    while ($geo = $db->get_row_array_assoc($sessionqry)) {
+        if (( $geo["lat"] != 0 ) && ( $geo["lon"] != 0 )) {
+            $mapdata[] = "new google.maps.LatLng(" . $geo['lat'] . ", " . $geo['lon'] . ")";
+        }
+    }
     $imapdata = implode(",\n                    ", $mapdata);
 
     // Don't need to set zoom manually
     $setZoomManually = 0;
-
-}
-else {
+} else {
     // Define these so we don't get an error on empty page loads. Instead it
     // will load a map of Area 51.
     $session_id = "";
     $imapdata = "new google.maps.LatLng(37.235, -115.8111)";
     $setZoomManually = 1;
-
 }
 
 ?>
@@ -76,7 +76,8 @@ else {
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.0/chosen.min.css">
         <link rel="stylesheet" href="static/css/torque.css">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
-        <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+        <script language="javascript" type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
             <script language="javascript" type="text/javascript">
                 $(document).ready(function() {
                     if("<?php echo $timezone; ?>".length==0){
@@ -94,11 +95,16 @@ else {
                     }
                 });
             </script>
-        <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
-        <script language="javascript" type="text/javascript" src="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-        <script language="javascript" type="text/javascript" src="static/js/jquery.peity.min.js"></script>
-        <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.1.0/chosen.jquery.min.js"></script>
-        <script language="javascript" type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
+        <script language="javascript" type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+        <script language="javascript" type="text/javascript"
+            src="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+        <script language="javascript" type="text/javascript"
+            src="static/js/jquery.peity.min.js"></script>
+        <script language="javascript" type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.1.0/chosen.jquery.min.js"></script>
+        <script language="javascript" type="text/javascript"
+            src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
 
         <script language="javascript" type="text/javascript">
           function initialize() {
@@ -190,24 +196,31 @@ else {
           google.maps.event.addDomListener(window, 'load', initialize);
         </script>
 
-        <?php if ($setZoomManually === 0) { ?>
+        <?php if ($setZoomManually === 0) {
+            ?>
 
         <!-- Flot Javascript files -->
         <script language="javascript" type="text/javascript" src="static/js/jquery.flot.js"></script>
         <script language="javascript" type="text/javascript" src="static/js/jquery.flot.axislabels.js"></script>
         <script language="javascript" type="text/javascript" src="static/js/jquery.flot.hiddengraphs.js"></script>
-        <script language="javascript" type="text/javascript" src="static/js/jquery.flot.multihighlight-delta.js"></script>
+        <script language="javascript" type="text/javascript"
+            src="static/js/jquery.flot.multihighlight-delta.js"></script>
         <script language="javascript" type="text/javascript" src="static/js/jquery.flot.selection.js"></script>
         <script language="javascript" type="text/javascript" src="static/js/jquery.flot.time.js"></script>
         <script language="javascript" type="text/javascript" src="static/js/jquery.flot.tooltip.min.js"></script>
         <script language="javascript" type="text/javascript" src="static/js/jquery.flot.updater.js"></script>
         <script language="javascript" type="text/javascript" src="static/js/jquery.flot.resize.min.js"></script>
-        
+
         <script language="javascript" type="text/javascript">
         $(document).ready(function(){
 
-            var s1 = [<?php foreach($d1 as $b) {echo "[".$b[0].", ".$b[1]."],";} ?>];
-            var s2 = [<?php foreach($d2 as $d) {echo "[".$d[0].", ".$d[1]."],";} ?>];
+            var s1 = [<?php foreach ($d1 as $b) {
+                echo "[" . $b[0] . ", " . $b[1] . "],";
+                      }
+                        ?>];
+            var s2 = [<?php foreach ($d2 as $d) {
+                echo "[" . $d[0] . ", " . $d[1] . "],";
+                      } ?>];
 
             var flotData = [
                             { data: s1, label: <?php echo $v1_label; ?> },
@@ -265,7 +278,7 @@ else {
         <script language="javascript" type="text/javascript" src="static/js/torquehelpers.js"></script>
         <?php } ?>
 
-        
+
 
     </head>
     <body>
@@ -285,22 +298,44 @@ else {
                     <h4>Select Session</h4>
                     <div class="row center-block" style="padding-bottom:4px;">
                         <form method="post" class="form-horizontal" role="form" action="url.php">
-                          <select id="seshidtag" name="seshidtag" class="form-control chosen-select" onchange="this.form.submit()" data-placeholder="Select Session..." style="width:100%;">
+                          <select id="seshidtag" name="seshidtag" class="form-control chosen-select"
+                            onchange="this.form.submit()" data-placeholder="Select Session..." style="width:100%;">
                             <option value=""></option>
                             <?php
                             foreach ($seshdates as $dateid => $datestr) { ?>
-                              <option value="<?php echo $dateid; ?>"<?php if ($dateid == $session_id) echo ' selected'; ?>><?php echo $datestr; if ($show_session_length) {echo $seshsizes[$dateid];} ?></option>
+                              <option value="<?php echo $dateid; ?>"
+                                <?php
+                                if ($dateid == $session_id) {
+                                    echo ' selected';
+                                }
+                                ?>>
+                                <?php
+                                echo $datestr;
+                                if ($show_session_length) {
+                                    echo $seshsizes[$dateid];
+                                }
+                                ?></option>
                             <?php } ?>
                           </select>
                           <noscript><input type="submit" id="seshidtag" name="seshidtag" class="input-sm"></noscript>
                         </form>
 
 
-<?php if(isset($session_id) && !empty($session_id)){ ?>
+<?php if (isset($session_id) && !empty($session_id)) { ?>
                         <div class="btn-group btn-group-justified">
                           <table style="width:100%"><tr>
-                            <td><form method="post" class="form-horizontal" role="form" action="session.php?mergesession=<?php echo $session_id; ?>&mergesessionwith=<?php echo $session_id_next; ?>" id="formmerge">
-                              <div align="center" style="padding-top:6px;"><input class="btn btn-info btn-sm" type="submit" id="formmerge" name="merge" value="Merge" title="Merge this session (<?php echo $seshdates[$session_id]; ?>) with the next session (<?php echo $seshdates[$session_id_next]; ?>)." <?php if(!$session_id_next){ echo 'disabled="disabled"';} ?> /></div>
+                            <td><form method="post" class="form-horizontal" role="form"
+                                action="session.php?mergesession=<?php echo $session_id; ?>&mergesessionwith=<?php
+                                echo $session_id_next; ?>" id="formmerge">
+                              <div align="center" style="padding-top:6px;"><input class="btn btn-info btn-sm"
+                                type="submit" id="formmerge" name="merge" value="Merge"
+                                title="Merge this session (<?php echo $seshdates[$session_id]; ?>) with the next session
+                                (<?php echo $seshdates[$session_id_next]; ?>)."
+                                <?php
+                                if (!$session_id_next) {
+                                    echo 'disabled="disabled"';
+                                } ?>
+                                 /></div>
                             </form></td>
                             <script type="text/javascript">
                               //Adding a confirmation dialog to above forms
@@ -335,9 +370,23 @@ else {
                         <form method="post" role="form" action="url.php?makechart=y&seshid=<?php echo $session_id; ?>" id="formplotdata">
                             <select data-placeholder="Choose OBD2 data..." multiple class="chosen-select" size="<?php echo $numcols; ?>" style="width:100%;" id="plot_data" onsubmit="onSubmitIt" name="plotdata[]">
                                 <option value=""></option>
-                                <?php foreach ($coldata as $xcol) { if ( !(($coldataempty[$xcol['colname']]==1) && ($hide_empty_variables))) {?>
-                                  <option value="<?php echo $xcol['colname']; ?>" <?php echo ($coldataempty[$xcol['colname']]?"class='dataempty'":"") ?>><?php echo $xcol['colcomment'].($coldataempty[$xcol['colname']]?" &nbsp; [empty]":""); ?></option>
-                                <?php }} ?>
+                                <?php
+                                foreach ($coldata as $xcol) {
+                                    if (!(($coldataempty[$xcol['colname']] == 1) && ($hide_empty_variables))) {
+                                        ?>
+                                  <option value="<?php echo $xcol['colname']; ?>"
+                                        <?php
+                                        echo ($coldataempty[$xcol['colname']] ? "class='dataempty'" : "")
+                                        ?>>
+                                        <?php
+                                        echo $xcol['colcomment'] . ($coldataempty[$xcol['colname']] ? " &nbsp; [empty]" : "");
+                                        ?>
+
+                                        </option>
+                                        <?php
+                                    }
+                                }
+                                ?>
                             </select>
                             <div align="center" style="padding-top:6px;"><input class="btn btn-info btn-sm" type="submit" id="formplotdata" name="plotdata[]" value="Plot!"></div>
                         </form>
@@ -353,17 +402,23 @@ else {
                     <h4>Chart</h4>
                     <div class="row center-block" style="padding-bottom:5px;">
 
-                    <?php if ($setZoomManually === 0) { ?>
+                    <?php
+                    if ($setZoomManually === 0) {
+                        ?>
 
                         <div class="demo-container">
                             <div id="placeholder" class="demo-placeholder" style="height:300px;"></div>
                         </div>
 
-                    <?php } else { ?>
+                        <?php
+                    } else {
+                        ?>
                         <div align="center" style="padding-top:10px;">
                             <h5><span class="label label-warning">Select a session first!</span></h5>
                         </div>
-                    <?php } ?>
+                        <?php
+                    }
+                    ?>
 
                     </div>
 
@@ -372,7 +427,9 @@ else {
                     <h4>Data Summary</h4>
                     <div class="row center-block">
 
-                    <?php if ($setZoomManually === 0) { ?>
+                    <?php
+                    if ($setZoomManually === 0) {
+                        ?>
 
                         <div class="table-responsive">
                             <table class="table">
@@ -388,8 +445,12 @@ else {
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td><strong><?php echo substr($v1_label, 1, -1); ?></strong></td>
-                                        <td><?php echo $min1.'/'.$max1; ?></td>
+                                        <td><strong>
+                                            <?php
+                                            echo substr($v1_label, 1, -1);
+                                            ?>
+                                            </strong></td>
+                                        <td><?php echo $min1 . '/' . $max1; ?></td>
                                         <td><?php echo $pcnt25data1; ?></td>
                                         <td><?php echo $pcnt75data1; ?></td>
                                         <td><?php echo $avg1; ?></td>
@@ -397,7 +458,7 @@ else {
                                     </tr>
                                     <tr>
                                         <td><strong><?php echo substr($v2_label, 1, -1); ?></strong></td>
-                                        <td><?php echo $min2.'/'.$max2; ?></td>
+                                        <td><?php echo $min2 . '/' . $max2; ?></td>
                                         <td><?php echo $pcnt25data2; ?></td>
                                         <td><?php echo $pcnt75data2; ?></td>
                                         <td><?php echo $avg2; ?></td>
@@ -408,7 +469,8 @@ else {
                         </div>
 
 
-                    <?php } else { ?>
+                    <?php } else {
+                        ?>
 
                         <div align="center" style="padding-top:5px;">
                             <h5><span class="label label-warning">Select a session first!</span></h5>
@@ -423,11 +485,12 @@ else {
                     <h4>Export Data</h4>
                     <div class="row center-block" style="padding-bottom:18px;">
 
-                    <?php if ($setZoomManually === 0) { ?>
+                    <?php if ($setZoomManually === 0) {
+                        ?>
 
                         <div class="btn-group btn-group-justified">
-                            <a class="btn btn-default" role="button" href="<?php echo './export.php?sid='.$session_id.'&filetype=csv'; ?>">CSV</a>
-                            <a class="btn btn-default" role="button" href="<?php echo './export.php?sid='.$session_id.'&filetype=json'; ?>">JSON</a>
+                            <a class="btn btn-default" role="button" href="<?php echo './export.php?sid=' . $session_id . '&filetype=csv'; ?>">CSV</a>
+                            <a class="btn btn-default" role="button" href="<?php echo './export.php?sid=' . $session_id . '&filetype=json'; ?>">JSON</a>
                         </div>
 
                     <?php } else { ?>
