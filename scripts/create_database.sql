@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Apr 22, 2021 at 06:36 PM
+-- Generation Time: May 03, 2021 at 09:40 PM
 -- Server version: 5.5.64-MariaDB
 -- PHP Version: 7.2.26
 
@@ -27,61 +27,58 @@ USE `torque_test`;
 -- --------------------------------------------------------
 
 --
--- Table structure for table `key_info`
+-- Table structure for table `data_entries`
 --
 
-DROP TABLE IF EXISTS `key_info`;
-CREATE TABLE IF NOT EXISTS `key_info` (
+DROP TABLE IF EXISTS `data_entries`;
+CREATE TABLE IF NOT EXISTS `data_entries` (
   `session_id` int(11) NOT NULL,
-  `key_id` varchar(10) NOT NULL,
-  `long_name` varchar(60) NOT NULL,
-  `short_name` varchar(30) NOT NULL,
-  `default_unit` varchar(10) NOT NULL,
-  `user_unit` varchar(10) NOT NULL
+  `entry_pid_id` int(11) NOT NULL,
+  `entry_time` datetime NOT NULL,
+  `entry_value` float NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='The log data from Torque Pro.';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `data_headers`
+--
+
+DROP TABLE IF EXISTS `data_headers`;
+CREATE TABLE IF NOT EXISTS `data_headers` (
+  `id` int(11) NOT NULL,
+  `vehicle_id` int(11) NOT NULL,
+  `session_start` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `key_info_temp`
+-- Table structure for table `data_pids`
 --
 
-DROP TABLE IF EXISTS `key_info_temp`;
-CREATE TABLE IF NOT EXISTS `key_info_temp` (
-  `session_id` int(11) NOT NULL,
-  `key_id` varchar(10) NOT NULL,
-  `long_name` varchar(60) DEFAULT NULL,
-  `short_name` varchar(30) DEFAULT NULL,
-  `default_unit` varchar(10) DEFAULT NULL,
-  `user_unit` varchar(10) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Holds key_info data for session until both calls complete.';
-
--- --------------------------------------------------------
-
---
--- Table structure for table `raw_logs`
---
-
-DROP TABLE IF EXISTS `raw_logs`;
-CREATE TABLE IF NOT EXISTS `raw_logs` (
-  `session_id` int(11) NOT NULL,
-  `time` varchar(15) CHARACTER SET utf8 NOT NULL,
-  `key_id` varchar(10) CHARACTER SET utf8 NOT NULL,
-  `key_value` float NOT NULL
+DROP TABLE IF EXISTS `data_pids`;
+CREATE TABLE IF NOT EXISTS `data_pids` (
+  `id` int(11) NOT NULL,
+  `header_id` int(11) NOT NULL,
+  `pid_id` varchar(30) NOT NULL COMMENT 'Torque Pro ID for PID, starts with "k."',
+  `full_name` varchar(60) NOT NULL COMMENT 'Full name from Torque Pro.',
+  `short_name` varchar(30) NOT NULL COMMENT 'Short name from Torque Pro.',
+  `unit` varchar(10) NOT NULL COMMENT 'Unit from Torque Pro. If userUnit from Torque Pro is not blank, this will be that unit, otherwise it will be the defaultUnit sent will be used.'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `session_header`
+-- Table structure for table `upload_sessions`
 --
 
-DROP TABLE IF EXISTS `session_header`;
-CREATE TABLE IF NOT EXISTS `session_header` (
-  `int_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `v` varchar(1) CHARACTER SET utf8 NOT NULL,
-  `session` varchar(15) CHARACTER SET utf8 NOT NULL
+DROP TABLE IF EXISTS `upload_sessions`;
+CREATE TABLE IF NOT EXISTS `upload_sessions` (
+  `upload_id` varchar(36) NOT NULL,
+  `session_start` datetime NOT NULL,
+  `data` text NOT NULL,
+  `last_access` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -92,38 +89,30 @@ CREATE TABLE IF NOT EXISTS `session_header` (
 
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE IF NOT EXISTS `users` (
-  `int_id` int(11) NOT NULL,
-  `eml` varchar(255) NOT NULL,
-  `id` varchar(32) NOT NULL
+  `id` int(11) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `alias` varchar(30) DEFAULT NULL COMMENT 'A screen name.',
+  `upload_id` varchar(36) NOT NULL,
+  `abrp_id` varchar(36) DEFAULT NULL,
+  `abrp_forward` tinyint(1) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `vehicle_info`
+-- Table structure for table `vehicles`
 --
 
-DROP TABLE IF EXISTS `vehicle_info`;
-CREATE TABLE IF NOT EXISTS `vehicle_info` (
-  `session_id` int(11) NOT NULL,
-  `vehicle_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `vehicle_profile`
---
-
-DROP TABLE IF EXISTS `vehicle_profile`;
-CREATE TABLE IF NOT EXISTS `vehicle_profile` (
-  `int_id` int(11) NOT NULL,
-  `owner` int(11) NOT NULL,
-  `name` int(11) NOT NULL,
-  `fuel_type` tinyint(4) NOT NULL,
-  `fuel_cost` float NOT NULL,
-  `weight` float NOT NULL,
-  `ve` float NOT NULL
+DROP TABLE IF EXISTS `vehicles`;
+CREATE TABLE IF NOT EXISTS `vehicles` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL COMMENT 'Owner ID',
+  `name` varchar(30) NOT NULL COMMENT 'Vehicle profile name from Torque Pro',
+  `fuel_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'Fuel type from Torque Pro',
+  `fuel_cost` float NOT NULL DEFAULT '0' COMMENT 'Fuel Cost from Torque Pro.',
+  `weight` float NOT NULL DEFAULT '0' COMMENT 'Weight from Torque Pro.',
+  `ve` float NOT NULL DEFAULT '0' COMMENT 'Volumetric Efficiency from Torque Pro.'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
@@ -131,110 +120,100 @@ CREATE TABLE IF NOT EXISTS `vehicle_profile` (
 --
 
 --
--- Indexes for table `key_info`
+-- Indexes for table `data_entries`
 --
-ALTER TABLE `key_info`
-  ADD PRIMARY KEY (`session_id`,`key_id`),
-  ADD KEY `IDX_KI_SESS` (`session_id`);
+ALTER TABLE `data_entries`
+  ADD PRIMARY KEY (`session_id`,`entry_pid_id`,`entry_time`) USING BTREE,
+  ADD KEY `fk_data_entries_data_pids` (`entry_pid_id`);
 
 --
--- Indexes for table `key_info_temp`
+-- Indexes for table `data_headers`
 --
-ALTER TABLE `key_info_temp`
-  ADD PRIMARY KEY (`session_id`,`key_id`),
-  ADD KEY `IDX_KIT_SESS` (`session_id`) USING BTREE;
+ALTER TABLE `data_headers`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_data_headers_vehicles` (`vehicle_id`);
 
 --
--- Indexes for table `raw_logs`
+-- Indexes for table `data_pids`
 --
-ALTER TABLE `raw_logs`
-  ADD PRIMARY KEY (`session_id`,`time`),
-  ADD KEY `IDX_DATA_SID` (`session_id`);
+ALTER TABLE `data_pids`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unq_data_pids_header_pid` (`header_id`,`pid_id`);
 
 --
--- Indexes for table `session_header`
+-- Indexes for table `upload_sessions`
 --
-ALTER TABLE `session_header`
-  ADD PRIMARY KEY (`int_id`),
-  ADD UNIQUE KEY `v` (`user_id`,`v`,`session`) USING BTREE,
-  ADD KEY `IDX_SH_UID` (`user_id`);
+ALTER TABLE `upload_sessions`
+  ADD PRIMARY KEY (`upload_id`,`session_start`);
 
 --
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
-  ADD PRIMARY KEY (`int_id`),
-  ADD UNIQUE KEY `eml` (`eml`,`id`),
-  ADD UNIQUE KEY `eml_2` (`eml`,`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unq_users_email` (`email`),
+  ADD UNIQUE KEY `unq_users_upload_id` (`upload_id`),
+  ADD UNIQUE KEY `unq_users_alias` (`alias`);
 
 --
--- Indexes for table `vehicle_info`
+-- Indexes for table `vehicles`
 --
-ALTER TABLE `vehicle_info`
-  ADD PRIMARY KEY (`session_id`,`vehicle_id`),
-  ADD KEY `FK_VP_ID` (`vehicle_id`);
-
---
--- Indexes for table `vehicle_profile`
---
-ALTER TABLE `vehicle_profile`
-  ADD PRIMARY KEY (`int_id`),
-  ADD UNIQUE KEY `owner` (`owner`,`name`,`fuel_type`,`fuel_cost`,`weight`,`ve`),
-  ADD KEY `IDX_VP_OWN` (`owner`);
+ALTER TABLE `vehicles`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unq_vehicles_user_and_name` (`user_id`,`name`);
 
 --
 -- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT for table `session_header`
+-- AUTO_INCREMENT for table `data_headers`
 --
-ALTER TABLE `session_header`
-  MODIFY `int_id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `data_headers`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `data_pids`
+--
+ALTER TABLE `data_pids`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `int_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
--- AUTO_INCREMENT for table `vehicle_profile`
+-- AUTO_INCREMENT for table `vehicles`
 --
-ALTER TABLE `vehicle_profile`
-  MODIFY `int_id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `vehicles`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- Constraints for dumped tables
 --
 
 --
--- Constraints for table `key_info`
+-- Constraints for table `data_entries`
 --
-ALTER TABLE `key_info`
-  ADD CONSTRAINT `FK_KI_SESS` FOREIGN KEY (`session_id`) REFERENCES `session_header` (`int_id`);
+ALTER TABLE `data_entries`
+  ADD CONSTRAINT `fk_data_entries_data_headers` FOREIGN KEY (`session_id`) REFERENCES `data_headers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_data_entries_data_pids` FOREIGN KEY (`entry_pid_id`) REFERENCES `data_pids` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `key_info_temp`
+-- Constraints for table `data_headers`
 --
-ALTER TABLE `key_info_temp`
-  ADD CONSTRAINT `FK_KIT_SESS` FOREIGN KEY (`session_id`) REFERENCES `session_header` (`int_id`);
+ALTER TABLE `data_headers`
+  ADD CONSTRAINT `fk_data_headers_vehicles` FOREIGN KEY (`vehicle_id`) REFERENCES `vehicles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `session_header`
+-- Constraints for table `data_pids`
 --
-ALTER TABLE `session_header`
-  ADD CONSTRAINT `FK_SH_UID` FOREIGN KEY (`user_id`) REFERENCES `users` (`int_id`);
+ALTER TABLE `data_pids`
+  ADD CONSTRAINT `fk_data_pids_data_headers` FOREIGN KEY (`header_id`) REFERENCES `data_headers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `vehicle_info`
+-- Constraints for table `vehicles`
 --
-ALTER TABLE `vehicle_info`
-  ADD CONSTRAINT `FK_SESS_ID` FOREIGN KEY (`session_id`) REFERENCES `session_header` (`int_id`),
-  ADD CONSTRAINT `FK_VP_ID` FOREIGN KEY (`vehicle_id`) REFERENCES `vehicle_profile` (`int_id`);
-
---
--- Constraints for table `vehicle_profile`
---
-ALTER TABLE `vehicle_profile`
-  ADD CONSTRAINT `FK_VP_OWN` FOREIGN KEY (`owner`) REFERENCES `users` (`int_id`);
+ALTER TABLE `vehicles`
+  ADD CONSTRAINT `fk_vehicles_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
