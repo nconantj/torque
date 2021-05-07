@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="MyDb" id="Project_99b" database="MySql" >
+	<schema name="torque_test" >
+		<table name="data_entries" >
+			<comment><![CDATA[The log data from Torque Pro.]]></comment>
+			<column name="entry_time" type="datetime" jt="93" mandatory="y" />
+			<column name="entry_pid_id" type="int" jt="4" mandatory="y" />
+			<column name="entry_value" type="float" jt="7" mandatory="y" >
+				<defo><![CDATA[0]]></defo>
+			</column>
+			<index name="pk_data_entries" unique="PRIMARY_KEY" >
+				<column name="entry_time" />
+				<column name="entry_pid_id" />
+			</index>
+			<fk name="fk_data_entries_data_pids" to_schema="torque_test" to_table="data_pids" delete_action="cascade" update_action="cascade" >
+				<fk_column name="entry_pid_id" pk="id" />
+			</fk>
+			<options><![CDATA[engine=InnoDB]]></options>
+		</table>
+		<table name="data_headers" >
+			<column name="id" type="int" jt="4" mandatory="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="vehicle_id" type="int" jt="4" mandatory="y" />
+			<column name="session_start" type="datetime" jt="93" mandatory="y" >
+				<defo><![CDATA[CURRENT_TIMESTAMP]]></defo>
+			</column>
+			<index name="pk_data_headers_id" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<fk name="fk_data_headers_vehicles" to_schema="torque_test" to_table="vehicles" delete_action="cascade" update_action="cascade" >
+				<fk_column name="vehicle_id" pk="id" />
+			</fk>
+			<options><![CDATA[engine=InnoDB]]></options>
+		</table>
+		<table name="data_pids" >
+			<column name="id" type="int" jt="4" mandatory="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="header_id" type="int" jt="4" mandatory="y" />
+			<column name="pid_id" type="varchar" length="30" jt="12" mandatory="y" >
+				<comment><![CDATA[Torque Pro ID for PID, starts with "k."]]></comment>
+			</column>
+			<column name="full_name" type="varchar" length="60" jt="12" mandatory="y" >
+				<comment><![CDATA[Full name from Torque Pro.]]></comment>
+			</column>
+			<column name="short_name" type="varchar" length="30" jt="12" mandatory="y" >
+				<comment><![CDATA[Short name from Torque Pro.]]></comment>
+			</column>
+			<column name="unit" type="varchar" length="10" jt="12" mandatory="y" >
+				<comment><![CDATA[Unit from Torque Pro. If userUnit from Torque Pro is not blank, this will be that unit, otherwise it will be the defaultUnit sent will be used.]]></comment>
+			</column>
+			<index name="pk_data_pids_id" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="unq_data_pids_header_pid" unique="UNIQUE_KEY" >
+				<comment><![CDATA[Each session can only have a pid appear once.]]></comment>
+				<column name="header_id" />
+				<column name="pid_id" />
+			</index>
+			<fk name="fk_data_pids_data_headers" to_schema="torque_test" to_table="data_headers" delete_action="cascade" update_action="cascade" >
+				<fk_column name="header_id" pk="id" />
+			</fk>
+			<options><![CDATA[engine=InnoDB]]></options>
+		</table>
+		<table name="upload_sessions" >
+			<column name="upload_id" type="varchar" length="36" jt="12" mandatory="y" />
+			<column name="session_start" type="datetime" jt="93" mandatory="y" />
+			<column name="data" type="text" jt="-1" mandatory="y" />
+			<column name="last_access" type="datetime" jt="93" mandatory="y" >
+				<defo><![CDATA[CURRENT_TIMESTAMP]]></defo>
+			</column>
+			<index name="pk_upload_sessions" unique="PRIMARY_KEY" >
+				<column name="upload_id" />
+				<column name="session_start" />
+			</index>
+			<options><![CDATA[engine=InnoDB]]></options>
+		</table>
+		<table name="users" >
+			<column name="id" type="int" jt="4" mandatory="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="email" type="varchar" length="255" jt="12" mandatory="y" />
+			<column name="password" type="varchar" length="255" jt="12" mandatory="y" />
+			<column name="alias" type="varchar" length="30" jt="12" >
+				<comment><![CDATA[A screen name.]]></comment>
+			</column>
+			<column name="upload_id" type="varchar" length="36" jt="12" mandatory="y" />
+			<column name="abrp_id" type="varchar" length="36" jt="12" />
+			<column name="abrp_forward" type="boolean" jt="-7" mandatory="y" >
+				<defo><![CDATA[false]]></defo>
+			</column>
+			<index name="pk_users_id" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="unq_users_email" unique="UNIQUE_KEY" >
+				<column name="email" />
+			</index>
+			<index name="unq_users_upload_id" unique="UNIQUE_KEY" >
+				<column name="upload_id" />
+			</index>
+			<index name="unq_users_alias" unique="UNIQUE_KEY" >
+				<column name="alias" />
+			</index>
+			<options><![CDATA[engine=InnoDB]]></options>
+		</table>
+		<table name="vehicles" >
+			<column name="id" type="int" jt="4" mandatory="y" >
+				<identity><![CDATA[AUTO_INCREMENT]]></identity>
+			</column>
+			<column name="user_id" type="int" jt="4" mandatory="y" >
+				<comment><![CDATA[Owner ID]]></comment>
+			</column>
+			<column name="name" type="varchar" length="30" jt="12" mandatory="y" >
+				<comment><![CDATA[Vehicle profile name from Torque Pro]]></comment>
+			</column>
+			<column name="fuel_type" type="tinyint" jt="-6" mandatory="y" >
+				<defo><![CDATA[0]]></defo>
+				<comment><![CDATA[Fuel type from Torque Pro]]></comment>
+			</column>
+			<column name="fuel_cost" type="float" jt="7" mandatory="y" >
+				<defo><![CDATA[0]]></defo>
+				<comment><![CDATA[Fuel Cost from Torque Pro.]]></comment>
+			</column>
+			<column name="weight" type="float" jt="7" mandatory="y" >
+				<defo><![CDATA[0]]></defo>
+				<comment><![CDATA[Weight from Torque Pro.]]></comment>
+			</column>
+			<column name="ve" type="float" jt="7" mandatory="y" >
+				<defo><![CDATA[0]]></defo>
+				<comment><![CDATA[Volumetric Efficiency from Torque Pro.]]></comment>
+			</column>
+			<index name="pk_vehicles_id" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="unq_vehicles_user_and_name" unique="UNIQUE_KEY" >
+				<comment><![CDATA[Each user can only have one vehicle with the given name.]]></comment>
+				<column name="user_id" />
+				<column name="name" />
+			</index>
+			<fk name="fk_vehicles_user" to_schema="torque_test" to_table="users" delete_action="cascade" update_action="cascade" >
+				<fk_column name="user_id" pk="id" />
+			</fk>
+			<options><![CDATA[engine=InnoDB]]></options>
+		</table>
+	</schema>
+	<connector name="MyDb" database="MySql" driver_class="com.mysql.jdbc.Driver" driver_jar="mysql-connector-java-8.0.23.jar" driver_desc="Standard" host="localhost" port="3306" instance="torque_test" user="root" />
+	<layout name="Main Layout" id="Layout_1ba2" show_relation="columns" >
+		<entity schema="torque_test" name="data_entries" color="C1D8EE" x="288" y="304" />
+		<entity schema="torque_test" name="data_headers" color="C1D8EE" x="512" y="48" />
+		<entity schema="torque_test" name="data_pids" color="C1D8EE" x="496" y="304" />
+		<entity schema="torque_test" name="upload_sessions" color="C1D8EE" x="48" y="304" />
+		<entity schema="torque_test" name="users" color="C1D8EE" x="48" y="64" />
+		<entity schema="torque_test" name="vehicles" color="C1D8EE" x="304" y="64" />
+	</layout>
+</project>

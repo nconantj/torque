@@ -59,8 +59,13 @@ class Vehicle
      */
     private $sessions;
 
-    public function __construct()
+    public function __construct($owner, $name, $fuelType, $fuelCost, $weight, $ve)
     {
         $this->sessions = new ArrayCollection();
+        $this->$owner = $owner;
+        $this->$fuelType = $fuelType;
+        $this->fuelCost = $fuelCost;
+        $this->weight = $weight;
+        $this->ve = $ve;
     }
 }

@@ -31,3 +31,5 @@ $use_miles = false;
 
 $hide_empty_variables = true;
 $show_session_length = true;
+
+const TORQUE_NAMESPACE ='';

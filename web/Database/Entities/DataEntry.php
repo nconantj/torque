@@ -44,4 +44,12 @@ class DataEntry
      * @Column(type="float", name="entry_value")
      */
     private $value;
+
+    public function __construct($sessionID, $pidID, $time, $value)
+    {
+        $this->sessionID = $sessionID;
+        $this->$pidID = $pidID;
+        $this->$time = $time;
+        $this->$value = $value;
+    }
 }

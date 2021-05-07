@@ -44,10 +44,13 @@ class DataHeader
      */
     private $sessionStart;
 
-    public function __construct()
+    public function __construct($vehicle, $sessionStart);
     {
         $this->pids = new ArrayCollection();
         $this->entries = new ArrayCollection();
+
+        $this->vehicle = $vehicle;
+        $this->sessionStart = $sessionStart;
     }
 
 }
