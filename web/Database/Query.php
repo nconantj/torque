@@ -1,8 +1,9 @@
 <?php
 
-namespace /Database;
+namespace \Database;
 
-class Query {
+class Query
+{
     private string $query;
 
     public function delete(): Query
@@ -31,16 +32,13 @@ class Query {
 
     public function set(array $columns): Query
     {
-        if (count($columns) == 0)
-        {
-            die ("Invalid argument count.");
+        if (count($columns) == 0) {
+            die("Invalid argument count.");
         }
 
         $qry .= " SET ";
-        foreach ($columns as $column)
-        {
-            if (!is_string($column))
-            {
+        foreach ($columns as $column) {
+            if (!is_string($column)) {
                 die("Only strings allowed.");
             }
 
@@ -57,25 +55,23 @@ class Query {
         return $this;
     }
 
-    public function columns(array $columns): Query {
+    public function columns(array $columns): Query
+    {
 
-        if (count(columns) > 0)
-        {
+        if (count(columns) > 0) {
             $this->query .= " (" . implode(",", $columns) . ")"
         }
     }
 
     public function values(array $params): Query
     {
-        if(count($params) == 0)
-        {
+        if (count($params) == 0) {
             die("Invalid parameter count.");
         }
 
         $this->query .= " VALUES (";
 
-        foreach($params as $param)
-        {
+        foreach ($params as $param) {
             $this->query .= "?,";
         }
 
@@ -87,14 +83,11 @@ class Query {
 
     public function select(array $columns)
     {
-        if($columns == null || count($columns) == 0)
-        {
+        if ($columns == null || count($columns) == 0) {
             $this->query .= "*";
         } else {
-            foreach($columns as $column)
-            {
-                if(!is_string($column)
-                {
+            foreach ($columns as $column) {
+                if (!is_string($column) {
                     die("Columns must be strings.");
                 }
             }
@@ -105,7 +98,8 @@ class Query {
         return $this;
     }
 
-    public function getQuery(): string {
+    public function getQuery(): string
+    {
         return $this->query;
     }
-?>
+}

@@ -1,16 +1,19 @@
 <?php
-namespace /Torque;
-use /Database;
 
-class Users{
+namespace \Torque;
+
+use Database;
+
+class Users
+{
     private array $usersByID = null;
     private array $usersByUniqueKey = null;
     private array $updatedUsers = null;
     private array $newUsers = null;
 
-    Database $database;
+    private Database $database;
 
-    function __construct(
+    public function __construct(
         string $host,
         string $user,
         string $pass,
@@ -23,7 +26,8 @@ class Users{
         $this->updatedUsers = array();
     }
 
-    public function load() {
+    public function load()
+    {
         $this->usersByID = array();
         $this->usersByUniqueKey = array();
         array $dbUsers = $database->selectAll('users')->fetch_all(MYSQLI_ASSOC);
@@ -35,12 +39,14 @@ class Users{
         }
     }
 
-    public function loadUserByID($userID) {
+    public function loadUserByID($userID)
+    {
         // Not yet implemented
         die("Not yet implemented.");
     }
 
-    public function getUserByID($userID): User {
+    public function getUserByID($userID): User
+    {
         if ($this->usersByID == null) {
             return null;
         }
@@ -50,12 +56,13 @@ class Users{
 
     public function getUser(string $eml, string $torqueID): User
     {
-        $uniqueKey = array( 'eml'=>$eml, 'torque_id'=>$torqueID);
+        $uniqueKey = array( 'eml' => $eml, 'torque_id' => $torqueID);
 
         return $this->usersByUniqueKey[$uniqueKey];
     }
 
-    public function containsUserID($userID) {
+    public function containsUserID($userID)
+    {
         return ($this->getUserByID($userID) != null);
     }
 
@@ -64,9 +71,9 @@ class Users{
         return ($this->getUser($eml, $torqueID) != null);
     }
 
-    public function pushNewUsers() {
-        while (count($this->newUsers) > 0)
-        {
+    public function pushNewUsers()
+    {
+        while (count($this->newUsers) > 0) {
             $user = array_pop($this->newUsers);
             $user->setUserID(
                 $this->database->insert(
@@ -79,19 +86,15 @@ class Users{
             $this->usersByID[$user->getUserID] = $user;
             $this->usersByUniqueKey[$user->getUniqueKey()] = $user;
         }
-
-
     }
 
     public function addUser(
         string $eml,
         string $torqueID,
         bool $push = true
-    ): User
-    {
+    ): User {
         // Check before inserting.
-        if ($this->containsUser($eml, $torqueID))
-        {
+        if ($this->containsUser($eml, $torqueID)) {
             return $this->usersByUniqueKey($eml, $torqueID);
         }
 
@@ -99,8 +102,7 @@ class Users{
 
         $this->newUsers[] = $user;
 
-        if ($push)
-        {
+        if ($push) {
             $this->pushNewUsers();
         }
 
@@ -110,8 +112,7 @@ class Users{
     public function pushUpdatedUsers()
     {
         // Update the database;
-        while (count($this->updatedUsers) > 0)
-        {
+        while (count($this->updatedUsers) > 0) {
             $updatedUser = array_pop($this->updatedUsers);
             [$userID, $user] = $updatedUser;
             $this->database->update(
@@ -123,36 +124,47 @@ class Users{
         }
     }
 
+    public function flush()
+    {
+        $this->pushNewUsers();
+        $this->pushUpdatedUsers();
+    }
+
+    public function reset()
+    {
+        $this->newUsers = array();
+        $this->updatedUsers = array();
+    }
+
+    public function __destruct()
+    {
+        $this->flush();
+    }
+
     public function updateUser(
         int $userID,
         string $eml = "",
         string $torqueID = "",
-        bool $push=false
-    )
-    {
-        if (!$this->containsUserID($userID))
-        {
+        bool $push = false
+    ) {
+        if (!$this->containsUserID($userID)) {
             return false;
         }
 
         $user = $this->getUserByID($userID);
 
-        if ($eml != "")
-        {
+        if ($eml != "") {
             $user->setEml($eml);
         }
 
-        if ($torqueID != "")
-        {
+        if ($torqueID != "") {
             $user->setTorqueID($torqueID);
         }
 
-        if ($user->isChanged())
-        {
+        if ($user->isChanged()) {
             $this->updatedUsers[] = array($userID, $user);
 
-            if ($push)
-            {
+            if ($push) {
                 $this->pushUpdatedUsers();
             }
         }
@@ -161,19 +173,16 @@ class Users{
     public function updateUserEml(
         int $userID,
         string $eml,
-        bool $push=false
-    ): bool
-    {
+        bool $push = false
+    ): bool {
         return $this->updateUser($userID, $eml, "", $push);
     }
 
     public function updateUserTorqueID(
         int $userID,
         string $torqueID,
-        bool $push=false
-    ): bool
-    {
+        bool $push = false
+    ): bool {
         return $this->updateUser($userID, "", $torqueID, $push);
     }
 }
-?>

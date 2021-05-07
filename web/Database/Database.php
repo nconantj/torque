@@ -1,11 +1,12 @@
 <?php
-namespace /Database;
+
+namespace \Database;
 
 class Database
 {
-    protected mysqli $connection;
+    private mysqli $connection;
 
-    function __construct(
+    public function __construct(
         string $host,
         string $user,
         string $pass,
@@ -13,14 +14,11 @@ class Database
     ) {
         $this->connection = new mysqli($host, $user, $pass, $database);
         if ($this->connection->connect_error) {
-            throw new die(
-                'mysqli connection error: '
-                . $this->mysqli->connect_error
-            );
+            die('mysqli connection error: ' . $this->mysqli->connect_error);
         }
     }
 
-    function __destruct()
+    public function __destruct()
     {
         $this->connection->close();
     }
@@ -29,8 +27,7 @@ class Database
     {
         $conn = $this->connection;
         $stmt = $conn->prepare($query->getQuery());
-        if ($params != null && count($params) > 0)
-        {
+        if ($params != null && count($params) > 0) {
             $types = str_repeat("s", count($params));
             $stmt->bind_param($types, $params);
         }
@@ -42,8 +39,7 @@ class Database
         string $table,
         string $requirement,
         array $params
-    ): bool
-    {
+    ): bool {
         $query = new Query();
         $query->delete()->from($table)->where($requirement);
         return $this->query($query, $params);
@@ -53,15 +49,14 @@ class Database
     {
         $query = new Query();
         $query->insert($table)->columns($columns)->values($params);
-        $stmt = $conn->prepare($query->getQuery());
-        if ($params != null && count($params) > 0)
-        {
+        $stmt = $connection->prepare($query->getQuery());
+        if ($params != null && count($params) > 0) {
             $types = str_repeat("s", count($params));
             $stmt->bind_param($types, $params);
         }
 
         $stmt->execute();
-        return $stmt->insert_id;
+        return $connection->insert_id;
     }
 
     public function update(
@@ -69,8 +64,7 @@ class Database
         array $columns,
         string $requirement,
         array $params
-    ): bool
-    {
+    ): bool {
         $query = new Query();
         $query->update($table)->set($columns)->where($requirement);
 
@@ -82,8 +76,7 @@ class Database
         array $columns,
         string $requirement = "",
         array $params = null
-    ): mysqli_result
-    {
+    ): mysqli_result {
         $conn = $this->connection;
         $query = new Query();
         $query->select($columns)->from($table)->where($requirement);
@@ -109,19 +102,32 @@ class Database
         return $stmt->get_result();
     }
 
-    public function count(string $table): int {
+    public function count(string $table): int
+    {
         $conn = $this->connection;
         $stmt = $conn("SELECT COUNT(*) FROM " . $table);
         $stmt->execute();
         return $stmt->get_result()->fetch_row()[0];
     }
 
-    public function change_db($database) {
+    public function changeDB($database)
+    {
         return $this->mysqli->select_db($database);
     }
 
-    public function db_die() {
-        die ($this->mysqli->error);
+    public function dbDie()
+    {
+        die($this->mysqli->error);
+    }
+
+    public function rowCount(mysqli_result $result)
+    {
+        return $result->num_rows;
+    }
+
+    public function fetchRowAssoc(mysqli_result $result)
+    {
+        return $result->fetch_assoc();
     }
 }
 ?>
