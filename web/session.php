@@ -37,15 +37,19 @@ if (isset($session_id)) {
 	// kff1005 = longitude
 	// kff1006 = latitude
     $sessionqry = $db->get_data($db_table, array('kff1006 AS lat', 'kff1005 AS lon'), null, "session=$session_id", "time DESC");
-	
+
     // Create array of Latitude/Longitude strings in Google Maps JavaScript format
 	$mapdata = array();
+    $mapdata_leaflet = array();
+
     while( $geo = $db->get_row_array_assoc($sessionqry) ) {
 		if (( $geo["lat"] != 0 ) && ( $geo["lon"] != 0 )) {
 			$mapdata[] = "new google.maps.LatLng(".$geo['lat'].", ".$geo['lon'].")";
+            $mapdata_leaflet[] = array($geo['lat'], $geo['long']);
 		}
 	}
     $imapdata = implode(",\n                    ", $mapdata);
+    $imapdata_leaflet = json_encode($mapdata_leaflet);
 
     // Don't need to set zoom manually
     $setZoomManually = 0;
@@ -56,6 +60,7 @@ else {
     // will load a map of Area 51.
     $session_id = "";
     $imapdata = "new google.maps.LatLng(37.235, -115.8111)";
+    $imapdata_leaflet = json_encode(array(array(37.235, -115.8111)));
     $setZoomManually = 1;
 
 }
@@ -100,6 +105,14 @@ else {
         <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.1.0/chosen.jquery.min.js"></script>
         <script language="javascript" type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+   integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+   crossorigin=""/>
+<!-- Make sure you put this AFTER Leaflet's CSS -->
+ <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+   integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+   crossorigin=""></script>
+
         <script language="javascript" type="text/javascript">
           function initialize() {
             var mapDiv = document.getElementById('map-canvas');
@@ -128,6 +141,14 @@ else {
 
             // The potentially large array of LatLng objects for the roadmap
             var path = [<?php echo $imapdata; ?>];
+            var path_leaflet = <?php echo $imapdata_leaflet; ?>;
+
+            let mymap = L.map('leaflet_map');
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors', maxZoom: 50}).addTo(mymap);
+
+            var path_leaflet_polyline = L.polyline(path_leaflet, {weight: 6, color: 'darkred'}).addTo(mymap);
+
+            mymap.fitBounds(path_leaflet_polyline.getBounds());
 
             // Create a boundary using the path to automatically configure
             // the default centering location and zoom.
@@ -202,7 +223,7 @@ else {
         <script language="javascript" type="text/javascript" src="static/js/jquery.flot.tooltip.min.js"></script>
         <script language="javascript" type="text/javascript" src="static/js/jquery.flot.updater.js"></script>
         <script language="javascript" type="text/javascript" src="static/js/jquery.flot.resize.min.js"></script>
-        
+
         <script language="javascript" type="text/javascript">
         $(document).ready(function(){
 
@@ -265,7 +286,7 @@ else {
         <script language="javascript" type="text/javascript" src="static/js/torquehelpers.js"></script>
         <?php } ?>
 
-        
+
 
     </head>
     <body>
@@ -278,6 +299,7 @@ else {
             </div>
             <div id="map-container" class="col-md-7 col-xs-12">
                 <div id="map-canvas"></div>
+                <div id="leaflet_map"></div>
             </div>
             <div id="right-container" class="col-md-5 col-xs-12">
                 <div id="right-cell">
