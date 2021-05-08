@@ -132,7 +132,7 @@ if (isset($session_id)) {
                         id: 'mapbox/streets-v11',
                         tileSize: 512,
                         zoomOffset: -1,
-                        accessToken: '<?php echo $mapBoxAccessToken; ?>'
+                        accessToken: '<?php echo "$mapBoxAccessToken"; ?>'
                     }).addTo(mymap);
 
                     var path_polyline = L.polyline(path, {weight: 6, color: 'darkred'}).addTo(mymap);
