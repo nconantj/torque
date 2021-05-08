@@ -45,7 +45,7 @@ GRANT ALL PRIVILEGES ON torque.* TO 'steve'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
-Then create a table in the database to store the logged data using the `create_torque_log_table.sql` file provided in the `scripts` folder of this repo: 
+Then create a table in the database to store the logged data using the `create_torque_log_table.sql` file provided in the `scripts` folder of this repo:
 
 **WARNING:** This is data destructive. Export your data before running the script if you are updating.
 
@@ -82,6 +82,22 @@ $db_user = "steve";
 $db_pass = "zissou";
 $db_name = "torque";
 $db_table = "raw_logs";
+...
+```
+
+### Session Viewing ###
+
+In order to see the map underlying a session location plot when viewing
+sessions, you need to got to mapbox.com, create an account, and create a token.
+
+MapBox automatically creates a token for you, but it is highly recommended that
+you create a new one that you can customize.
+
+Once you have the token, copy and paste it to the **$mapBoxAccessToken** field.
+
+```php
+...
+$mapBoxAccessToken = 'mapBoxAccessToken';
 ...
 ```
 
