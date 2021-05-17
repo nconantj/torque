@@ -1,7 +1,8 @@
 <?php
-require_once ('creds.php');
-require_once ('auth_app.php');
-require_once ('db_functions.php');
+
+require_once('creds.php');
+require_once('auth_app.php');
+require_once('db_functions.php');
 
 if ($abrp_forward) {
     $params = $_SERVER['QUERY_STRING'];
@@ -26,19 +27,21 @@ if (sizeof($_GET) > 0) {
             $keys[] = $key;
             $values[] = $value;
             $submitval = 1;
-        }
-        else if (in_array($key, array("v", "eml", "time", "id", "session"))) {
+        } elseif (in_array($key, array("v", "eml", "time", "id", "session"))) {
             $keys[] = $key;
-            $values[] = "'".$value."'";
+            $values[] = "'" . $value . "'";
             $submitval = 1;
-        }
-
-        // Skip columns matching userUnit*, defaultUnit*, and profile*
-        else if (preg_match("/^userUnit/", $key) or preg_match("/^defaultUnit/", $key) or (preg_match("/^profile/", $key) and (!preg_match("/^profileName/", $key)))) {
+        } elseif (
+            preg_match("/^userUnit/", $key)
+            or preg_match("/^defaultUnit/", $key)
+            or (
+                preg_match("/^profile/", $key)
+                and (!preg_match("/^profileName/", $key))
+            )
+        ) {
+            // Skip columns matching userUnit*, defaultUnit*, and profile*
             $submitval = 0;
-        }
-
-        else {
+        } else {
             $submitval = 0;
         }
         // NOTE: Use the following "else" statement instead of the one above
@@ -50,7 +53,7 @@ if (sizeof($_GET) > 0) {
         //}
         // If the field doesn't already exist, add it to the database
         if (!in_array($key, $dbfields) and $submitval == 1) {
-            $db->add_column($db_table, $key, 'VARCHAR(255)', false, '0');
+            $db->add_column($db_table, $key, 'FLOAT', false, '0');
         }
     }
 
@@ -59,10 +62,8 @@ if (sizeof($_GET) > 0) {
         $db->insert_data($db_table, $keys, $values);
     }
 } else {
-    die ( "No URL parameters." );
+    die("No URL parameters.");
 }
 
 // Return the response required by Torque
 echo "OK!";
-
-?>
