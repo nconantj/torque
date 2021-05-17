@@ -14,8 +14,8 @@ $db_table = 'raw_logs';
 $auth_user = '';    //Sample: 'torque'
 $auth_pass = '';    //Sample: 'open'
 
-//If you want to restrict access to upload_data.php, 
-// either enter your torque ID as shown in the torque app, 
+//If you want to restrict access to upload_data.php,
+// either enter your torque ID as shown in the torque app,
 // or enter the hashed ID as it can found in the uploaded data.
 //The hash is simply MD5(ID).
 //Leave empty to allow any torque app to upload data to this server.
@@ -31,4 +31,8 @@ $use_miles = false;
 $hide_empty_variables = true;
 $show_session_length = true;
 
+// Go to https://www.mapbox.com/
+// Sign up for an account
+// Get an access token and enter it here.
+$mapBoxAccessToken = ''
 ?>
